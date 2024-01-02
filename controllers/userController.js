@@ -7,8 +7,16 @@ const respondOnValidationError = require('../utils/respondOnValidationError');
 const userSchema = require('../express-validator-schemas/user');
 
 exports.signUp = [
-  // TODO: conform to error format used in GET
   checkSchema(userSchema),
+
+  asyncHandler(async (req, res, next) => {
+    const foundUser = await findUser(req.body.username);
+    if (foundUser)
+      return res
+        .status(409)
+        .send({ errors: [{ title: 'Username is already taken.' }] });
+    return next();
+  }),
 
   asyncHandler(async (req, res, next) => {
     respondOnValidationError(req, res, next);
@@ -38,6 +46,11 @@ exports.signUp = [
 exports.getUser = asyncHandler(async (req, res) => {
   try {
     const foundUser = await findUser(req.params.username);
+    if (!foundUser) {
+      return res
+        .status(404)
+        .send({ errors: [{ title: 'User does not exist' }] });
+    }
     const user = {
       username: foundUser.username,
       dateCreated: foundUser.dateCreated,
@@ -46,11 +59,6 @@ exports.getUser = asyncHandler(async (req, res) => {
     };
     return res.send(user);
   } catch (error) {
-    if (error.message === '404') {
-      return res
-        .status(404)
-        .send({ errors: [{ title: 'User does not exist' }] });
-    }
     return res
       .status(500)
       .send({ errors: [{ title: 'Internal server error' }] });
