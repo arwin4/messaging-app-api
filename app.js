@@ -8,18 +8,15 @@ const mongoose = require('mongoose');
 
 const app = express();
 
+// Import secrets
+require('dotenv').config();
+
 // CORS
 const corsOptions = {
   origin: process.env.CORS_ORIGIN,
   maxAge: 7200,
 };
 app.use(cors(corsOptions));
-
-// Import secrets
-require('dotenv').config();
-
-// Mongo imports
-const mongoString = process.env.MONGODB_CONNECTION_STRING;
 
 app.use(logger('dev'));
 app.use(express.json());
@@ -28,8 +25,10 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Routes
 const userRouter = require('./routes/user');
+const authRouter = require('./routes/auth');
 
 app.use('/users/', userRouter);
+app.use('/auth/', authRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
@@ -52,7 +51,7 @@ let mongoConnectionSuccessful = false;
 async function connectToMongoAtlas() {
   console.log('Connecting to MongoDB Atlas...');
   try {
-    await mongoose.connect(mongoString);
+    await mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
     mongoConnectionSuccessful = true;
   } catch (error) {
     console.log(error);
