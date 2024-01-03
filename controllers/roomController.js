@@ -2,6 +2,16 @@ const asyncHandler = require('express-async-handler');
 const findUser = require('../utils/findUser');
 const Room = require('../models/room');
 
+exports.getUserRooms = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+
+  const rooms = await Room.find({ members: userId }).select(
+    'dateCreated members',
+  );
+
+  return res.send({ rooms });
+});
+
 exports.createRoom = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   const { username } = req.user;
