@@ -4,13 +4,12 @@ const express = require('express');
 const router = express.Router();
 
 const authController = require('../controllers/authController');
+const verifyAuthorization = require('../passport/verifyAuthorization');
 
 // Login user
 router.post('/', authController.login);
 
 // Test route
-// router.get('/protected', verifyAuthorization, (req, res) =>
-//   res.status(200).send('youre in'),
-// );
+router.get('/test', verifyAuthorization, (req, res) => res.send());
 
 module.exports = router;
