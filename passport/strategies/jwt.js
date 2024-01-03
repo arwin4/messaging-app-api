@@ -10,6 +10,6 @@ module.exports = new JwtStrategy(opts, async (jwtPayload, done) => {
   const { username } = jwtPayload;
   const user = await User.findOne({ username });
 
-  if (username === user.username) return done(null, true);
+  if (username === user.username) return done(null, user);
   return done(null, false);
 });

@@ -1,14 +1,11 @@
 const passport = require('passport');
 
-const jwtStrategy = require('./strategies/jwt');
-
-passport.use(jwtStrategy);
-
 function verifyAuthorization(req, res, next) {
-  passport.authenticate('jwt', { session: false }, (err, status) => {
+  passport.authenticate('jwt', { session: false }, (err, user) => {
     if (err) return next(err);
-    if (!status)
+    if (!user)
       return res.status(401).send({ errors: [{ title: 'Unauthorized' }] });
+    req.user = user;
     return next();
   })(req, res, next);
 }

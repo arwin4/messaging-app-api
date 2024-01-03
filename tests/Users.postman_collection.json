@@ -41,7 +41,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{jwt2}}",
+							"value": "{{jwt}}",
 							"type": "string"
 						}
 					]

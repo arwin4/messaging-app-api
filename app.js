@@ -5,6 +5,10 @@ const express = require('express');
 const path = require('path');
 const logger = require('morgan');
 const mongoose = require('mongoose');
+const session = require('express-session');
+const passport = require('passport');
+
+const User = require('./models/user');
 
 const app = express();
 
@@ -23,12 +27,38 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+const sessionSecret = process.env.SESSION_SECRET;
+app.use(
+  session({ secret: sessionSecret, resave: false, saveUninitialized: true }),
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+const jwtStrategy = require('./passport/strategies/jwt');
+
+passport.use(jwtStrategy);
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
+
 // Routes
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
+const roomRouter = require('./routes/room');
 
 app.use('/users/', userRouter);
 app.use('/auth/', authRouter);
+app.use('/rooms/', roomRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
