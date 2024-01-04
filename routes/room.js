@@ -19,6 +19,6 @@ router.get('/:roomId', verifyAuthorization, roomController.getRoom);
 router.delete('/:roomId', verifyAuthorization, roomController.deleteRoom);
 
 /* Members */
-router.put('/:roomId', verifyAuthorization, roomController.addMembers);
+router.patch('/:roomId', verifyAuthorization, roomController.addMembers);
 
 module.exports = router;
