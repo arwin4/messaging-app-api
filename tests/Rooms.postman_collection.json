@@ -49,6 +49,134 @@
 			"response": []
 		},
 		{
+			"name": "Get room by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Body matches string\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`dateCreated`);\r",
+							"        pm.expect(pm.response.text()).to.include(`members`);\r",
+							"        pm.expect(pm.response.text()).to.include(`messages`);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/65958342fbe6bf69aa69dcd6",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"65958342fbe6bf69aa69dcd6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get room by ID - not a member",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Body matches string\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`The room does not exist or you are not a member of it`);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/65967638a16cc000928c605c",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"65967638a16cc000928c605c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get room by ID - room does not exist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Body matches string\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`The room does not exist or you are not a member of it`);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/65967638a16cc000928c605f",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"65967638a16cc000928c605f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create room",
 			"event": [
 				{
