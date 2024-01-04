@@ -1,6 +1,4 @@
 const asyncHandler = require('express-async-handler');
-const findUser = require('../utils/findUser');
-const Room = require('../models/room');
 const getAuthorizedRoom = require('../utils/getAuthorizedRoom');
 const handleBadRoomRequest = require('../utils/handleBadRoomRequest');
 
