@@ -87,7 +87,9 @@ exports.addMembers = asyncHandler(async (req, res) => {
     });
 
     await room.save();
-    return res.send(room.members);
+
+    const { members } = room;
+    return res.send({ members });
   } catch (error) {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
   }

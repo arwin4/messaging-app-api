@@ -20,7 +20,11 @@ router.delete('/:roomId', verifyAuthorization, roomController.deleteRoom);
 
 /* Members */
 // Add members
-router.patch('/:roomId', verifyAuthorization, roomController.addMembers);
+router.patch(
+  '/:roomId/members',
+  verifyAuthorization,
+  roomController.addMembers,
+);
 
 // Delete members
 router.delete(
