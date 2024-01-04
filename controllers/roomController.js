@@ -39,3 +39,28 @@ exports.createRoom = asyncHandler(async (req, res) => {
 
   return res.send(newRoom);
 });
+
+exports.getRoom = asyncHandler(async (req, res) => {
+  const userId = req.user._id.toString();
+  const { roomId } = req.params;
+
+  try {
+    const room = await Room.findOne({
+      _id: roomId,
+      members: userId,
+    });
+
+    if (!room)
+      return res.status(400).send({
+        errors: [
+          {
+            title: 'The room does not exist or you are not a member of it.',
+          },
+        ],
+      });
+
+    return res.send(room);
+  } catch (error) {
+    return res.status(500).send({ errors: [{ title: 'Database error' }] });
+  }
+});
