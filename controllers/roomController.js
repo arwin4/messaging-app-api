@@ -92,3 +92,38 @@ exports.addMembers = asyncHandler(async (req, res) => {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
   }
 });
+
+exports.deleteMembers = asyncHandler(async (req, res) => {
+  const { membersToDelete } = req.body;
+  const { roomId } = req.params;
+  const userId = req.user._id.toString();
+
+  try {
+    const room = await getAuthorizedRoom(roomId, userId, res);
+    if (!room) return handleBadRoomRequest(res);
+
+    const updatedMemberList = room.members.filter((member) => {
+      const memberString = member.toString();
+      return !membersToDelete.includes(memberString);
+    });
+
+    // Prevent ghost rooms
+    if (updatedMemberList.length < 1)
+      return res.status(400).send({
+        errors: [
+          {
+            title:
+              'This request would remove all members from the room, but rooms must have at least one member.',
+          },
+        ],
+      });
+
+    room.members = updatedMemberList;
+    await room.save();
+
+    const { members } = room;
+    return res.send({ members });
+  } catch (error) {
+    return res.status(500).send({ errors: [{ title: 'Database error' }] });
+  }
+});
