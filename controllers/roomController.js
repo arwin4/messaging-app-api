@@ -1,15 +1,20 @@
 const asyncHandler = require('express-async-handler');
 const findUser = require('../utils/findUser');
 const Room = require('../models/room');
+const getAuthorizedRoom = require('../utils/getAuthorizedRoom');
+const handleBadRoomRequest = require('../utils/handleBadRoomRequest');
 
 exports.getUserRooms = asyncHandler(async (req, res) => {
   const userId = req.user._id;
+  try {
+    const rooms = await Room.find({ members: userId }).select(
+      'dateCreated members',
+    );
 
-  const rooms = await Room.find({ members: userId }).select(
-    'dateCreated members',
-  );
-
-  return res.send({ rooms });
+    return res.send({ rooms });
+  } catch (error) {
+    return res.status(500).send({ errors: [{ title: 'Database error' }] });
+  }
 });
 
 exports.createRoom = asyncHandler(async (req, res) => {
@@ -33,11 +38,10 @@ exports.createRoom = asyncHandler(async (req, res) => {
 
   try {
     await newRoom.save();
+    return res.send(newRoom);
   } catch (error) {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
   }
-
-  return res.send(newRoom);
 });
 
 exports.getRoom = asyncHandler(async (req, res) => {
@@ -45,19 +49,8 @@ exports.getRoom = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
 
   try {
-    const room = await Room.findOne({
-      _id: roomId,
-      members: userId,
-    });
-
-    if (!room)
-      return res.status(400).send({
-        errors: [
-          {
-            title: 'The room does not exist or you are not a member of it.',
-          },
-        ],
-      });
+    const room = await getAuthorizedRoom(roomId, userId, res);
+    if (!room) return handleBadRoomRequest(res);
 
     return res.send(room);
   } catch (error) {
@@ -70,19 +63,10 @@ exports.deleteRoom = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
 
   try {
-    const room = await Room.findByIdAndDelete(roomId)
-      .where('members')
-      .in(userId);
+    const room = await getAuthorizedRoom(roomId, userId);
+    if (!room) return handleBadRoomRequest(res);
 
-    if (!room)
-      return res.status(400).send({
-        errors: [
-          {
-            title: 'The room does not exist or you are not a member of it.',
-          },
-        ],
-      });
-
+    await room.deleteOne();
     return res.send();
   } catch (error) {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
