@@ -49,4 +49,11 @@ router.post(
   messageController.sendMessage,
 );
 
+// Delete all messages in a room, regardless of author
+router.delete(
+  '/:roomId/messages',
+  verifyAuthorization,
+  messageController.deleteMessages,
+);
+
 module.exports = router;
