@@ -72,3 +72,23 @@ exports.deleteRoom = asyncHandler(async (req, res) => {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
   }
 });
+
+exports.addMembers = asyncHandler(async (req, res) => {
+  const { newMembers } = req.body;
+  const { roomId } = req.params;
+  const userId = req.user._id.toString();
+
+  try {
+    const room = await getAuthorizedRoom(roomId, userId, res);
+    if (!room) return handleBadRoomRequest(res);
+
+    newMembers.forEach((newMember) => {
+      if (!room.members.includes(newMember)) room.members.push(newMember);
+    });
+
+    await room.save();
+    return res.send(room.members);
+  } catch (error) {
+    return res.status(500).send({ errors: [{ title: 'Database error' }] });
+  }
+});
