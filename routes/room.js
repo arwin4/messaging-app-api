@@ -3,6 +3,7 @@ const express = require('express');
 const router = express.Router();
 
 const roomController = require('../controllers/roomController');
+const messageController = require('../controllers/messageController');
 const verifyAuthorization = require('../passport/verifyAuthorization');
 
 // Get rooms of which user is member. Does not include messages.
@@ -31,6 +32,21 @@ router.delete(
   '/:roomId/members',
   verifyAuthorization,
   roomController.deleteMembers,
+);
+
+/* Messages */
+// Get messages
+router.get(
+  '/:roomId/messages',
+  verifyAuthorization,
+  messageController.getMessages,
+);
+
+// Send message
+router.post(
+  '/:roomId/messages',
+  verifyAuthorization,
+  messageController.sendMessage,
 );
 
 module.exports = router;
