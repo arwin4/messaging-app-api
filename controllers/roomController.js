@@ -64,3 +64,27 @@ exports.getRoom = asyncHandler(async (req, res) => {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
   }
 });
+
+exports.deleteRoom = asyncHandler(async (req, res) => {
+  const userId = req.user._id.toString();
+  const { roomId } = req.params;
+
+  try {
+    const room = await Room.findByIdAndDelete(roomId)
+      .where('members')
+      .in(userId);
+
+    if (!room)
+      return res.status(400).send({
+        errors: [
+          {
+            title: 'The room does not exist or you are not a member of it.',
+          },
+        ],
+      });
+
+    return res.send();
+  } catch (error) {
+    return res.status(500).send({ errors: [{ title: 'Database error' }] });
+  }
+});

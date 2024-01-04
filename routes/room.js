@@ -15,4 +15,7 @@ router.post('/', verifyAuthorization, roomController.createRoom);
 // Get room by ID
 router.get('/:roomId', verifyAuthorization, roomController.getRoom);
 
+// Delete room by ID
+router.delete('/:roomId', verifyAuthorization, roomController.deleteRoom);
+
 module.exports = router;

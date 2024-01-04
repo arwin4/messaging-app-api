@@ -177,6 +177,90 @@
 			"response": []
 		},
 		{
+			"name": "Delete room by ID - room does not exist",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Body matches string\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`The room does not exist or you are not a member of it`);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/65967638a16cc000928c605f",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"65967638a16cc000928c605f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete room by ID - not a member",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Body matches string\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`The room does not exist or you are not a member of it`);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/65967638a16cc000928c605c",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"65967638a16cc000928c605c"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Create room",
 			"event": [
 				{
