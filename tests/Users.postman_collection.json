@@ -13,7 +13,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Body matches string\", function () {\r",
+							"pm.test(\"Returns user info\", function () {\r",
 							"        pm.expect(pm.response.text()).to.include(`\"username\"`);\r",
 							"        pm.expect(pm.response.text()).to.include(`\"exists\"`);\r",
 							"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
@@ -68,7 +68,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Body is correct\", function () {\r",
+							"pm.test(\"Rejects request for inexistent user\", function () {\r",
 							"    pm.response.to.have.body({\r",
 							"    \"errors\": [\r",
 							"        {\r",
@@ -125,7 +125,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Body matches string\", function () {\r",
+							"pm.test(\"Creates user\", function () {\r",
 							"        pm.expect(pm.response.text()).to.include(\"User created.\");\r",
 							"});\r",
 							""
@@ -176,7 +176,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Body is correct\", function () {\r",
+							"pm.test(\"Rejects password that is too short\", function () {\r",
 							"    pm.response.to.have.body(\r",
 							"{\r",
 							"    \"errors\": [\r",
