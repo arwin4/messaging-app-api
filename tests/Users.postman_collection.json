@@ -62,6 +62,61 @@
 			"response": []
 		},
 		{
+			"name": "Get current user",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Responds with correctly formatted user object\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`user`);\r",
+							"        pm.expect(pm.response.text()).to.include(`dateCreated`);\r",
+							"        pm.expect(pm.response.text()).to.include(`friends`);\r",
+							"        pm.expect(pm.response.json().user.id).to.equal('6594237cbe004b04c4972ee5');   \r",
+							"        pm.expect(pm.response.json().user.username).to.equal('test-run');   \r",
+							"    });\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/users/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"users",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get inexistent user",
 			"event": [
 				{

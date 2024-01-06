@@ -64,3 +64,11 @@ exports.getUser = asyncHandler(async (req, res) => {
       .send({ errors: [{ title: 'Internal server error' }] });
   }
 });
+
+exports.getCurrentUser = asyncHandler(async (req, res) => {
+  const { _id, username, dateCreated, friends } = req.user;
+
+  return res.send({
+    user: { id: _id, username, dateCreated, friends },
+  });
+});
