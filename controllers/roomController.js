@@ -49,7 +49,11 @@ exports.getRoom = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
 
   try {
-    const room = await getAuthorizedRoom(roomId, userId, res);
+    // Find the room and return only usernames for members
+    const room = await Room.findOne({
+      _id: roomId,
+      members: userId,
+    }).populate('members', 'username');
     if (!room) return handleBadRoomRequest(res);
 
     return res.send(room);
