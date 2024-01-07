@@ -49,11 +49,16 @@ exports.getRoom = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
 
   try {
-    // Find the room and return only usernames for members
+    // Find the room. Populate the members of the room and the messages'
+    // authors. For members/authors, include only usernames to prevent leaking
+    // data.
     const room = await Room.findOne({
       _id: roomId,
       members: userId,
-    }).populate('members', 'username');
+    })
+      .populate('members', 'username')
+      .populate('messages.author', 'username');
+
     if (!room) return handleBadRoomRequest(res);
 
     return res.send(room);
