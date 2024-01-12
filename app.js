@@ -7,10 +7,13 @@ const logger = require('morgan');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const passport = require('passport');
+const { createServer } = require('http');
 
-const User = require('./models/user');
+const startSocket = require('./socket.io/socket');
 
 const app = express();
+
+const User = require('./models/user');
 
 // Import secrets
 require('dotenv').config();
@@ -21,6 +24,12 @@ const corsOptions = {
   maxAge: 7200,
 };
 app.use(cors(corsOptions));
+
+// Create server for socket.io
+const httpServer = createServer(app);
+httpServer.listen(4000);
+
+startSocket(httpServer);
 
 app.use(logger('dev'));
 app.use(express.json());
