@@ -55,10 +55,12 @@ passport.deserializeUser(async (id, done) => {
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
 const roomRouter = require('./routes/room');
+const friendRouter = require('./routes/friend');
 
 app.use('/users/', userRouter);
 app.use('/auth/', authRouter);
 app.use('/rooms/', roomRouter);
+app.use('/friends/', friendRouter);
 
 // catch 404 and forward to error handler
 app.use((req, res, next) => {
