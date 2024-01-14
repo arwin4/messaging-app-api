@@ -14,4 +14,7 @@ router.get('/', verifyAuthorization, userController.getCurrentUser);
 // Sign up
 router.post('/', userController.signUp);
 
+// Add friends to current user
+router.patch('/', verifyAuthorization, userController.addFriend);
+
 module.exports = router;
