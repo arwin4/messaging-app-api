@@ -7,6 +7,227 @@
 	},
 	"item": [
 		{
+			"name": "Friends",
+			"item": [
+				{
+					"name": "Add friend (same as user)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
+									"        pm.expect(pm.response.text()).to.include(`errors`);\r",
+									"        pm.expect(pm.response.text()).to.include(`You cannot add yourself as a friend`);\r",
+									"    });\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"// email = pm.variables.replaceIn(\"{{$randomEmail}}\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newFriend\": \"test-run\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/friends/",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"friends",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add friend",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
+									"        pm.expect(pm.response.text()).to.include(`errors`);\r",
+									"        pm.expect(pm.response.text()).to.include(`You cannot add yourself as a friend`);\r",
+									"    });\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newFriend\": \"test-run\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/friends/",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"friends",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add friend (inexistent user)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
+									"        pm.expect(pm.response.text()).to.include(`errors`);\r",
+									"        pm.expect(pm.response.text()).to.include(`This user does not exist`);\r",
+									"    });\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newFriend\": \"does-not-exist\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/friends/",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"friends",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete friend",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
+									"        pm.expect(pm.response.text()).to.include(`friends`);\r",
+									"    });\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"friendsToDelete\": [\"the count\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/friends/",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"friends",
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Get user",
 			"event": [
 				{
@@ -170,8 +391,7 @@
 					"listen": "prerequest",
 					"script": {
 						"exec": [
-							"pm.environment.set(\"randomUsername\", _.random(1,1000000))\r",
-							""
+							"pm.environment.set(\"randomUsername\", _.random(1,1000000))"
 						],
 						"type": "text/javascript"
 					}
@@ -194,7 +414,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"username\": {{randomUsername}},\r\n    \"password\": \"abc\"\r\n}",
+					"raw": "{\r\n    \"username\": \"{{randomUsername}}\",\r\n    \"password\": \"abc\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
