@@ -9,6 +9,6 @@ const verifyAuthorization = require('../passport/verifyAuthorization');
 router.patch('/', verifyAuthorization, friendController.addFriend);
 
 // Delete a friend of current user
-router.delete('/', verifyAuthorization, friendController.deleteFriend);
+router.delete('/', verifyAuthorization, friendController.deleteFriends);
 
 module.exports = router;
