@@ -19,6 +19,13 @@ router.get('/:roomId', verifyAuthorization, roomController.getRoom);
 // Delete room by ID
 router.delete('/:roomId', verifyAuthorization, roomController.deleteRoom);
 
+// Convert room to group room
+router.patch(
+  '/:roomId/convert-to-group',
+  verifyAuthorization,
+  roomController.convertToGroup,
+);
+
 /* Members */
 // Add members
 router.patch(

@@ -11,6 +11,10 @@ const RoomSchema = new mongoose.Schema({
       ref: 'User',
     },
   ],
+  isGroup: {
+    type: Boolean,
+    required: false,
+  },
   messages: [
     new mongoose.Schema({
       dateCreated: {

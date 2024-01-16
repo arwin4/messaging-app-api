@@ -32,6 +32,7 @@ exports.createRoom = asyncHandler(async (req, res) => {
     dateCreated: Date.now(),
     members: [],
     messages: [],
+    isGroup: false,
   });
 
   newRoom.members.push(userId);
@@ -82,6 +83,22 @@ exports.deleteRoom = asyncHandler(async (req, res) => {
   }
 });
 
+exports.convertToGroup = asyncHandler(async (req, res) => {
+  const userId = req.user._id.toString();
+  const { roomId } = req.params;
+
+  try {
+    const room = await getAuthorizedRoom(roomId, userId);
+    if (!room) return handleBadRoomRequest(res);
+
+    room.isGroup = true;
+    await room.save();
+    return res.send();
+  } catch (error) {
+    return res.status(500).send({ errors: [{ title: 'Database error' }] });
+  }
+});
+
 exports.addMembers = asyncHandler(async (req, res) => {
   const { newMembers } = req.body;
   const { roomId } = req.params;
@@ -90,6 +107,22 @@ exports.addMembers = asyncHandler(async (req, res) => {
   try {
     const room = await getAuthorizedRoom(roomId, userId, res);
     if (!room) return handleBadRoomRequest(res);
+
+    // Ensure non-group rooms are restricted to a 2 member maximum
+    if (
+      !room.isGroup &&
+      (room.members.length === 2 ||
+        (room.members.length === 1 && newMembers.length > 1))
+    ) {
+      return res.status(400).send({
+        errors: [
+          {
+            title:
+              'Cannot add members because it would exceed the maximum of 2 members for non-group rooms.',
+          },
+        ],
+      });
+    }
 
     newMembers.forEach((newMember) => {
       if (!room.members.includes(newMember)) room.members.push(newMember);
