@@ -7,9 +7,10 @@ const handleBadRoomRequest = require('../utils/handleBadRoomRequest');
 exports.getUserRooms = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   try {
-    const rooms = await Room.find({ members: userId }).select(
-      'dateCreated members',
-    );
+    const rooms = await Room.find({ members: userId })
+      .select('dateCreated members isGroup')
+      .populate('members', 'username');
+    // .populate('messages.author', 'username');
 
     return res.send({ rooms });
   } catch (error) {
