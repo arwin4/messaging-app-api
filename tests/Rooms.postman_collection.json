@@ -7,6 +7,298 @@
 	},
 	"item": [
 		{
+			"name": "Create room",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Returns created room\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
+							"        pm.expect(pm.response.text()).to.include(`\"members\"`);\r",
+							"        pm.expect(pm.response.text()).to.include(`\"messages\"`);\r",
+							"});\r",
+							"\r",
+							"const jsonData = JSON.parse(responseBody)\r",
+							"pm.environment.set('roomId', jsonData._id)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add 2 members to non-group room with 1 member",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Refuses to add 2 members to non-group room with 1 member\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Cannot add members because it would exceed the maximum of 2 members for non-group rooms\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"newMembers\": [\"6594237cbe004b04c4972ee5\", \"65956bdc30e566e7c6152261\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/rooms/{{roomId}}/members",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"{{roomId}}",
+						"members"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add 1 member to non-group room",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Returns member list\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"members\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"newMembers\": [\"65956bba657c53a5f92d40e1\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/rooms/{{roomId}}/members",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"{{roomId}}",
+						"members"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add member to non-group room with 2 members",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Refuses to add another member to non-group room with 2 members\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Cannot add members because it would exceed the maximum of 2 members for non-group rooms\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"newMembers\": [\"65956bdc30e566e7c6152261\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/rooms/{{roomId}}/members",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"{{roomId}}",
+						"members"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Convert to group room",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/{{roomId}}/convert-to-group",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"{{roomId}}",
+						"convert-to-group"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add members to group room",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Returns member list\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"members\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"newMembers\": [\"6594237cbe004b04c4972ee5\", \"65956bba657c53a5f92d40e1\", \"65956bdc30e566e7c6152261\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/rooms/{{roomId}}/members",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"{{roomId}}",
+						"members"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get user rooms",
 			"event": [
 				{
@@ -80,17 +372,78 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{domain}}/rooms/65958342fbe6bf69aa69dcd6",
+					"raw": "{{domain}}/rooms/{{roomId}}",
 					"host": [
 						"{{domain}}"
 					],
 					"path": [
 						"rooms",
-						"65958342fbe6bf69aa69dcd6"
+						"{{roomId}}"
 					]
 				}
 			},
-			"response": []
+			"response": [
+				{
+					"name": "Get room",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/rooms/65958342fbe6bf69aa69dcd6",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								"65958342fbe6bf69aa69dcd6"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "X-Powered-By",
+							"value": "Express"
+						},
+						{
+							"key": "Access-Control-Allow-Origin",
+							"value": "http://localhost:5173"
+						},
+						{
+							"key": "Vary",
+							"value": "Origin"
+						},
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						},
+						{
+							"key": "Content-Length",
+							"value": "554"
+						},
+						{
+							"key": "ETag",
+							"value": "W/\"22a-3b3OszUyQWfCjOl4F1+VTsKEQNU\""
+						},
+						{
+							"key": "Date",
+							"value": "Sun, 07 Jan 2024 16:00:51 GMT"
+						},
+						{
+							"key": "Connection",
+							"value": "keep-alive"
+						},
+						{
+							"key": "Keep-Alive",
+							"value": "timeout=5"
+						}
+					],
+					"cookie": [],
+					"body": "{\n    \"_id\": \"65958342fbe6bf69aa69dcd6\",\n    \"dateCreated\": \"2024-01-03T15:54:42.839Z\",\n    \"members\": [\n        {\n            \"_id\": \"6594237cbe004b04c4972ee5\",\n            \"username\": \"test-run\"\n        }\n    ],\n    \"messages\": [\n        {\n            \"content\": {\n                \"isText\": true,\n                \"isImage\": false,\n                \"textContent\": \"Test content\"\n            },\n            \"dateCreated\": \"2024-01-07T15:47:51.451Z\",\n            \"author\": \"6594237cbe004b04c4972ee5\",\n            \"_id\": \"659ac7a71a3ccdce2ec192d5\"\n        },\n        {\n            \"content\": {\n                \"isText\": true,\n                \"isImage\": false,\n                \"textContent\": \"Test content\"\n            },\n            \"dateCreated\": \"2024-01-07T15:48:17.060Z\",\n            \"author\": \"6594237cbe004b04c4972ee5\",\n            \"_id\": \"659ac7c11a3ccdce2ec192da\"\n        }\n    ],\n    \"__v\": 55,\n    \"special\": \"TEST ROOM\"\n}"
+				}
+			]
 		},
 		{
 			"name": "Get room - not a member",
@@ -177,6 +530,110 @@
 			"response": []
 		},
 		{
+			"name": "Delete members - delete all members",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Refuses to delete all members\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"This request would remove all members from the room, but rooms must have at least one member\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"membersToDelete\": [\"6594237cbe004b04c4972ee5\", \"65956bba657c53a5f92d40e1\", \"65956bdc30e566e7c6152261\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/rooms/{{roomId}}/members/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"{{roomId}}",
+						"members",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete members - delete all other members",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Returns member list\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"members\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"membersToDelete\": [ \"65956bba657c53a5f92d40e1\", \"65956bdc30e566e7c6152261\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/rooms/{{roomId}}/members/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"{{roomId}}",
+						"members",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Delete room - room does not exist",
 			"event": [
 				{
@@ -248,122 +705,27 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "{{domain}}/rooms/6595740d379e705e4dbc085a",
+					"raw": "{{domain}}/rooms/65967638a16cc000928c605c",
 					"host": [
 						"{{domain}}"
 					],
 					"path": [
 						"rooms",
-						"6595740d379e705e4dbc085a"
+						"65967638a16cc000928c605c"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "Create room",
+			"name": "Delete room",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Returns created room\", function () {\r",
-							"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"members\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"messages\"`);\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "{{domain}}/rooms/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Add members",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Returns member list\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"members\");\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"newMembers\": [\"6594237cbe004b04c4972ee5\", \"6594237cbe004b04c4972ee6\", \"6594237cbe004b04c4972ee7\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/rooms/65958342fbe6bf69aa69dcd6/members",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						"65958342fbe6bf69aa69dcd6",
-						"members"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete members - delete all members",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Refuses to delete all members\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"This request would remove all members from the room, but rooms must have at least one member\");\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -383,77 +745,14 @@
 				},
 				"method": "DELETE",
 				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"membersToDelete\": [\"6594237cbe004b04c4972ee5\", \"6594237cbe004b04c4972ee6\", \"6594237cbe004b04c4972ee7\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
 				"url": {
-					"raw": "{{domain}}/rooms/65958342fbe6bf69aa69dcd6/members/",
+					"raw": "{{domain}}/rooms/{{roomId}}",
 					"host": [
 						"{{domain}}"
 					],
 					"path": [
 						"rooms",
-						"65958342fbe6bf69aa69dcd6",
-						"members",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete members - delete all other members",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Returns member list\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"members\");\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"membersToDelete\": [ \"6594237cbe004b04c4972ee6\", \"6594237cbe004b04c4972ee7\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/rooms/65958342fbe6bf69aa69dcd6/members/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						"65958342fbe6bf69aa69dcd6",
-						"members",
-						""
+						"{{roomId}}"
 					]
 				}
 			},
