@@ -15,7 +15,11 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
-							"});"
+							"});\r",
+							"\r",
+							"const jsonData = JSON.parse(responseBody)\r",
+							"console.log('JWT: ' + jsonData)\r",
+							"pm.environment.set('jwt', jsonData)"
 						],
 						"type": "text/javascript"
 					}
@@ -204,7 +208,7 @@
 					"bearer": [
 						{
 							"key": "token",
-							"value": "{{jwt2}}",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QtcnVuIiwiaWF0IjoxNzA1NDA0NzkwLCJleHAiOjE3MDU0OTExOTB9.MBsmBejtENosZzBOhVu8DYE5OxS_CdRjob8n53tBc2b",
 							"type": "string"
 						}
 					]
