@@ -42,6 +42,42 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 
     await room.save();
 
+    // The Count bot. Respond with a bot message if 'The Count' is present in the room.
+    const theCountUserId = '65a3ca1d625894cbba68610e';
+
+    // The second condition prevents The Count from responding to its own messages
+    if (room.members.includes(theCountUserId) && userId !== theCountUserId) {
+      // Calculate count
+      const totalMessagesInRoom = room.messages.length;
+      const messagesByTheCount = room.messages.filter(
+        (curMessage) => curMessage.author.toString() === theCountUserId,
+      ).length;
+      const messagesNotByTheCount = totalMessagesInRoom - messagesByTheCount;
+
+      // Compose message
+      let countMessage;
+      if (messagesByTheCount === 2) {
+        countMessage = '3! Ah ah ah!!';
+      } else {
+        countMessage = `${messagesNotByTheCount}!`;
+      }
+
+      const newReq = {
+        body: {
+          isText: true,
+          isImage: false,
+          textContent: countMessage,
+        },
+        user: {
+          _id: theCountUserId,
+        },
+        params: {
+          roomId,
+        },
+      };
+      return this.sendMessage(newReq, res);
+    }
+
     return res.send({ message });
   } catch (error) {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
