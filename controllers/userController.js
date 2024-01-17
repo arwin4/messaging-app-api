@@ -52,6 +52,7 @@ exports.getUser = asyncHandler(async (req, res) => {
         .send({ errors: [{ title: 'User does not exist' }] });
     }
     const user = {
+      _id: foundUser._id,
       username: foundUser.username,
       dateCreated: foundUser.dateCreated,
       friends: foundUser.friends,
@@ -65,10 +66,11 @@ exports.getUser = asyncHandler(async (req, res) => {
   }
 });
 
+// Get the user info from passport
 exports.getCurrentUser = asyncHandler(async (req, res) => {
   const { _id, username, dateCreated, friends } = req.user;
 
   return res.send({
-    user: { id: _id, username, dateCreated, friends },
+    user: { _id, username, dateCreated, friends },
   });
 });
