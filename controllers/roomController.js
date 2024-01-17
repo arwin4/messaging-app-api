@@ -84,7 +84,34 @@ exports.deleteRoom = asyncHandler(async (req, res) => {
   }
 });
 
+exports.getDuo = asyncHandler(async (req, res) => {
+  // TODO: add try..catch
+  const currentUserId = req.user._id;
+  const otherParticipantUsername = req.body.username;
+
+  // Find the non-group rooms that the current user is in
+  const userRooms = await Room.find()
+    .where('members', currentUserId)
+    .where('isGroup', false)
+    .select('members') // Pick relevant data
+    .populate('members', 'username');
+
+  // From the user's rooms, find the room that the other participant is also in
+  const duoRoom = userRooms.find((room) =>
+    room.members.some((member) => member.username === otherParticipantUsername),
+  );
+
+  if (!duoRoom) {
+    return res.status(404).send({
+      errors: [{ title: 'No non-group room found with this person' }],
+    });
+  }
+  return res.send(duoRoom);
+});
+
 exports.convertToGroup = asyncHandler(async (req, res) => {
+  // Groups cannot be converted back to duo rooms, because there must only be a
+  // maximum of 1 conversation between the same users.
   const userId = req.user._id.toString();
   const { roomId } = req.params;
 
@@ -125,6 +152,36 @@ exports.addMembers = asyncHandler(async (req, res) => {
       });
     }
 
+    // Ensure only 1 non-group conversation exists per duo. Only need to check
+    // this if there's just 1 member being added, because group rooms have no
+    // member limits.
+    if (newMembers.length === 1) {
+      // Find the non-group rooms that the current user is in
+      const userRooms = await Room.find()
+        .where('members', userId)
+        .where('isGroup', false)
+        .select('members') // Pick relevant data
+        .populate('members', 'username');
+
+      // Check whether there already is a non-group with the new member also in it
+      const newMember = newMembers[0];
+      const duoRoomExistsAlready = userRooms.find((curRoom) =>
+        curRoom.members.some((member) => member._id.toString() === newMember),
+      );
+
+      if (duoRoomExistsAlready) {
+        return res.status(409).send({
+          errors: [
+            {
+              title:
+                'Cannot add member, because a non-group room with these same members exists already.',
+            },
+          ],
+        });
+      }
+    }
+
+    // Add members, ignoring duplicates
     newMembers.forEach((newMember) => {
       if (!room.members.includes(newMember)) room.members.push(newMember);
     });

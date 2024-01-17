@@ -12,6 +12,9 @@ router.get('/', verifyAuthorization, roomController.getUserRooms);
 // Create room. Creator will be added to the room's members on creation.
 router.post('/', verifyAuthorization, roomController.createRoom);
 
+// Get duo conversation with specified user
+router.get('/duo', verifyAuthorization, roomController.getDuo);
+
 /* Rooms by ID */
 // Get room by ID
 router.get('/:roomId', verifyAuthorization, roomController.getRoom);

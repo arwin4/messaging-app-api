@@ -54,52 +54,9 @@
 		},
 		{
 			"name": "Add 2 members to non-group room with 1 member",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Refuses to add 2 members to non-group room with 1 member\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"Cannot add members because it would exceed the maximum of 2 members for non-group rooms\");\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
 			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
 				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"newMembers\": [\"6594237cbe004b04c4972ee5\", \"65956bdc30e566e7c6152261\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/rooms/{{roomId}}/members",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						"{{roomId}}",
-						"members"
-					]
-				}
+				"header": []
 			},
 			"response": []
 		},
@@ -206,6 +163,206 @@
 			"response": []
 		},
 		{
+			"name": "Get user rooms",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Gets rooms\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`rooms`);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get duo conversation",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Gets rooms\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`_id`);\r",
+							"        pm.expect(pm.response.text()).to.include(`members`);\r",
+							"        pm.expect(pm.response.text()).to.include(`username`);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\": \"Test user 1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/rooms/duo/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"duo",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create room for duo limit test",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Returns created room\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
+							"        pm.expect(pm.response.text()).to.include(`\"members\"`);\r",
+							"        pm.expect(pm.response.text()).to.include(`\"messages\"`);\r",
+							"});\r",
+							"\r",
+							"const jsonData = JSON.parse(responseBody)\r",
+							"pm.environment.set('duoTestRoomId', jsonData._id)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Attempt to create second duo room with same users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Refuses to create second duo room with same users\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Cannot add member, because a non-group room with these same members exists already\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status code is 409\", function () {\r",
+							"    pm.response.to.have.status(409);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"newMembers\": [\"65956bba657c53a5f92d40e1\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{domain}}/rooms/{{duoTestRoomId}}/members",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						"{{duoTestRoomId}}",
+						"members"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Convert to group room",
 			"event": [
 				{
@@ -293,48 +450,6 @@
 						"rooms",
 						"{{roomId}}",
 						"members"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get user rooms",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Gets rooms\", function () {\r",
-							"        pm.expect(pm.response.text()).to.include(`rooms`);\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{domain}}/rooms/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						""
 					]
 				}
 			},
