@@ -77,9 +77,9 @@
 							"listen": "test",
 							"script": {
 								"exec": [
-									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
-									"        pm.expect(pm.response.text()).to.include(`errors`);\r",
-									"        pm.expect(pm.response.text()).to.include(`You cannot add yourself as a friend`);\r",
+									"pm.test(\"Returns friend list with new friend in it\", function () {\r",
+									"        pm.expect(pm.response.text()).to.include(`friends`);\r",
+									"        pm.expect(pm.response.text()).to.include(`the count`);\r",
 									"    });\r",
 									""
 								],
@@ -102,7 +102,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"newFriend\": \"test-run\"\r\n}",
+							"raw": "{\r\n    \"newFriend\": \"the count\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -183,6 +183,7 @@
 								"exec": [
 									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
 									"        pm.expect(pm.response.text()).to.include(`friends`);\r",
+									"        pm.expect(pm.response.text()).to.not.include(`the count`);\r",
 									"    });\r",
 									""
 								],
@@ -235,6 +236,7 @@
 					"script": {
 						"exec": [
 							"pm.test(\"Returns user info\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`\"_id\"`);\r",
 							"        pm.expect(pm.response.text()).to.include(`\"username\"`);\r",
 							"        pm.expect(pm.response.text()).to.include(`\"exists\"`);\r",
 							"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
@@ -293,7 +295,7 @@
 							"        pm.expect(pm.response.text()).to.include(`user`);\r",
 							"        pm.expect(pm.response.text()).to.include(`dateCreated`);\r",
 							"        pm.expect(pm.response.text()).to.include(`friends`);\r",
-							"        pm.expect(pm.response.json().user.id).to.equal('6594237cbe004b04c4972ee5');   \r",
+							"        pm.expect(pm.response.json().user._id).to.equal('6594237cbe004b04c4972ee5');   \r",
 							"        pm.expect(pm.response.json().user.username).to.equal('test-run');   \r",
 							"    });\r",
 							""

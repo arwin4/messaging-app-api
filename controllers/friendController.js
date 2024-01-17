@@ -3,10 +3,10 @@ const findUser = require('../utils/findUser');
 
 exports.addFriend = asyncHandler(async (req, res) => {
   // TODO: add try..catch
-  const { newFriend } = req.body;
+  const { newFriend: newFriendUsername } = req.body;
 
-  const newFriendExists = await findUser(newFriend);
-  if (!newFriendExists) {
+  const newFriend = await findUser(newFriendUsername);
+  if (!newFriend) {
     return res
       .status(404)
       .send({ errors: [{ title: 'This user does not exist.' }] });
@@ -15,19 +15,27 @@ exports.addFriend = asyncHandler(async (req, res) => {
   const currentUser = await findUser(req.user.username);
   const { friends } = currentUser;
 
-  if (currentUser.username === newFriend) {
+  if (currentUser.username === newFriendUsername) {
     return res
       .status(400)
       .send({ errors: [{ title: 'You cannot add yourself as a friend.' }] });
   }
 
-  if (friends.includes(newFriend)) {
+  const filteredNewFriend = {
+    _id: newFriend._id,
+    username: newFriend.username,
+    isBot: newFriend.isBot,
+  };
+
+  if (
+    friends.some((friend) => friend.username === filteredNewFriend.username)
+  ) {
     return res
       .status(400)
       .send({ errors: [{ title: 'This user is already your friend.' }] });
   }
 
-  currentUser.friends.push(newFriend);
+  currentUser.friends.push(filteredNewFriend);
   await currentUser.save();
 
   return res.send({ friends: currentUser.friends });
@@ -41,7 +49,7 @@ exports.deleteFriends = asyncHandler(async (req, res) => {
     const oldFriends = currentUser.friends;
 
     const newFriends = oldFriends.filter(
-      (friend) => !friendsToDelete.includes(friend),
+      (friend) => !friendsToDelete.includes(friend.username),
     );
 
     currentUser.friends = newFriends;
