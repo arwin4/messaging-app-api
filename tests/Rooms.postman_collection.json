@@ -7,6 +7,454 @@
 	},
 	"item": [
 		{
+			"name": "Duo",
+			"item": [
+				{
+					"name": "Get non-existent duo conversation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(204);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/rooms/duo/does-not-exist",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								"duo",
+								"does-not-exist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create room for duo test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Returns created room\", function () {\r",
+									"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
+									"        pm.expect(pm.response.text()).to.include(`\"members\"`);\r",
+									"        pm.expect(pm.response.text()).to.include(`\"messages\"`);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"const jsonData = JSON.parse(responseBody)\r",
+									"pm.environment.set('duoTestRoomId', jsonData._id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/rooms/",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add 2 members to non-group room with 1 member",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Refuses to add 2 members to non-group room\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Cannot add members because it would exceed the maximum of 2 members for non-group rooms\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newMembers\": [\"65956bdc30e566e7c6152261\", \"65956bba657c53a5f92d40e1\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/rooms/{{duoTestRoomId}}/members/",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								"{{duoTestRoomId}}",
+								"members",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add 1 member to non-group room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Returns member list\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"members\");\r",
+									"    pm.expect(pm.response.text()).to.include(\"65956bba657c53a5f92d40e1\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newMembers\": [\"65956bba657c53a5f92d40e1\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/rooms/{{duoTestRoomId}}/members",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								"{{duoTestRoomId}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get duo room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Gets rooms\", function () {\r",
+									"        pm.expect(pm.response.text()).to.include(`_id`);\r",
+									"        pm.expect(pm.response.text()).to.include(`members`);\r",
+									"        pm.expect(pm.response.text()).to.include(`username`);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/rooms/duo/Test user 1",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								"duo",
+								"Test user 1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add member to non-group room with 2 members",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Refuses to add another member to non-group room with 2 members\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Cannot add members because it would exceed the maximum of 2 members for non-group rooms\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 400\", function () {\r",
+									"    pm.response.to.have.status(400);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newMembers\": [\"65956bdc30e566e7c6152261\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/rooms/{{duoTestRoomId}}/members",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								"{{duoTestRoomId}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[SETUP] Create room for duplicate duo test",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = JSON.parse(responseBody)\r",
+									"pm.environment.set('duoTestRoom2Id', jsonData._id)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/rooms/",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Attempt to create second duo room with same users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Refuses to create second duo room with same users\", function () {\r",
+									"    pm.expect(pm.response.text()).to.include(\"Cannot add member, because a non-group room with these same members exists already\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Status code is 409\", function () {\r",
+									"    pm.response.to.have.status(409);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"newMembers\": [\"65956bba657c53a5f92d40e1\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{domain}}/rooms/{{duoTestRoom2Id}}/members",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								"{{duoTestRoom2Id}}",
+								"members"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "[CLEANUP] Delete duo test room",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{jwt}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{domain}}/rooms/{{duoTestRoomId}}",
+							"host": [
+								"{{domain}}"
+							],
+							"path": [
+								"rooms",
+								"{{duoTestRoomId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Create room",
 			"event": [
 				{
@@ -17,6 +465,10 @@
 							"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
 							"        pm.expect(pm.response.text()).to.include(`\"members\"`);\r",
 							"        pm.expect(pm.response.text()).to.include(`\"messages\"`);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});\r",
 							"\r",
 							"const jsonData = JSON.parse(responseBody)\r",
@@ -47,316 +499,6 @@
 					"path": [
 						"rooms",
 						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Add 2 members to non-group room with 1 member",
-			"request": {
-				"method": "PATCH",
-				"header": []
-			},
-			"response": []
-		},
-		{
-			"name": "Add 1 member to non-group room",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Returns member list\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"members\");\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"newMembers\": [\"65956bba657c53a5f92d40e1\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/rooms/{{roomId}}/members",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						"{{roomId}}",
-						"members"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Add member to non-group room with 2 members",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Refuses to add another member to non-group room with 2 members\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"Cannot add members because it would exceed the maximum of 2 members for non-group rooms\");\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"newMembers\": [\"65956bdc30e566e7c6152261\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/rooms/{{roomId}}/members",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						"{{roomId}}",
-						"members"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get user rooms",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Gets rooms\", function () {\r",
-							"        pm.expect(pm.response.text()).to.include(`rooms`);\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{domain}}/rooms/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get duo conversation",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Gets rooms\", function () {\r",
-							"        pm.expect(pm.response.text()).to.include(`_id`);\r",
-							"        pm.expect(pm.response.text()).to.include(`members`);\r",
-							"        pm.expect(pm.response.text()).to.include(`username`);\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"protocolProfileBehavior": {
-				"disableBodyPruning": true
-			},
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"Test user 1\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/rooms/duo/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						"duo",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create room for duo limit test",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Returns created room\", function () {\r",
-							"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"members\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"messages\"`);\r",
-							"});\r",
-							"\r",
-							"const jsonData = JSON.parse(responseBody)\r",
-							"pm.environment.set('duoTestRoomId', jsonData._id)"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "POST",
-				"header": [],
-				"url": {
-					"raw": "{{domain}}/rooms/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Attempt to create second duo room with same users",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Refuses to create second duo room with same users\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"Cannot add member, because a non-group room with these same members exists already\");\r",
-							"});\r",
-							"\r",
-							"pm.test(\"Status code is 409\", function () {\r",
-							"    pm.response.to.have.status(409);\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"newMembers\": [\"65956bba657c53a5f92d40e1\"]\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/rooms/{{duoTestRoomId}}/members",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"rooms",
-						"{{duoTestRoomId}}",
-						"members"
 					]
 				}
 			},
@@ -411,8 +553,14 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Returns member list\", function () {\r",
-							"    pm.expect(pm.response.text()).to.include(\"members\");\r",
+							"pm.test(\"Returns member list containing the specified members\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"6594237cbe004b04c4972ee5\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"65956bba657c53a5f92d40e1\");\r",
+							"    pm.expect(pm.response.text()).to.include(\"65956bdc30e566e7c6152261\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -456,6 +604,51 @@
 			"response": []
 		},
 		{
+			"name": "Get user rooms",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Gets rooms\", function () {\r",
+							"        pm.expect(pm.response.text()).to.include(`rooms`);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{jwt}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{domain}}/rooms/",
+					"host": [
+						"{{domain}}"
+					],
+					"path": [
+						"rooms",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Get room",
 			"event": [
 				{
@@ -467,7 +660,11 @@
 							"        pm.expect(pm.response.text()).to.include(`members`);\r",
 							"        pm.expect(pm.response.text()).to.include(`messages`);\r",
 							"});\r",
-							""
+							"\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -570,7 +767,10 @@
 							"pm.test(\"Refuses request for room that requester is not in\", function () {\r",
 							"        pm.expect(pm.response.text()).to.include(`The room does not exist or you are not a member of it`);\r",
 							"});\r",
-							""
+							"\r",
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -612,7 +812,10 @@
 							"pm.test(\"Refuses request for room that does not exist\", function () {\r",
 							"        pm.expect(pm.response.text()).to.include(`The room does not exist or you are not a member of it`);\r",
 							"});\r",
-							""
+							"\r",
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});"
 						],
 						"type": "text/javascript"
 					}
@@ -653,6 +856,10 @@
 						"exec": [
 							"pm.test(\"Refuses to delete all members\", function () {\r",
 							"    pm.expect(pm.response.text()).to.include(\"This request would remove all members from the room, but rooms must have at least one member\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -705,6 +912,10 @@
 						"exec": [
 							"pm.test(\"Returns member list\", function () {\r",
 							"    pm.expect(pm.response.text()).to.include(\"members\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -758,6 +969,8 @@
 							"pm.test(\"Refuses deleting room that does not exist\", function () {\r",
 							"        pm.expect(pm.response.text()).to.include(`The room does not exist or you are not a member of it`);\r",
 							"});\r",
+							"\r",
+							"\r",
 							""
 						],
 						"type": "text/javascript"
@@ -800,6 +1013,10 @@
 							"pm.test(\"Refuses to delete room of which requester is not a member\", function () {\r",
 							"        pm.expect(pm.response.text()).to.include(`The room does not exist or you are not a member of it`);\r",
 							"});\r",
+							"\r",
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
 							""
 						],
 						"type": "text/javascript"
@@ -841,7 +1058,8 @@
 						"exec": [
 							"pm.test(\"Status code is 200\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
-							"});"
+							"});\r",
+							""
 						],
 						"type": "text/javascript"
 					}
