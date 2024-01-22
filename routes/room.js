@@ -13,7 +13,7 @@ router.get('/', verifyAuthorization, roomController.getUserRooms);
 router.post('/', verifyAuthorization, roomController.createRoom);
 
 // Get duo conversation with specified user
-router.get('/duo', verifyAuthorization, roomController.getDuo);
+router.get('/duo/:username', verifyAuthorization, roomController.getDuo);
 
 /* Rooms by ID */
 // Get room by ID

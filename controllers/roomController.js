@@ -87,7 +87,7 @@ exports.deleteRoom = asyncHandler(async (req, res) => {
 exports.getDuo = asyncHandler(async (req, res) => {
   // TODO: add try..catch
   const currentUserId = req.user._id;
-  const otherParticipantUsername = req.body.username;
+  const otherParticipantUsername = req.params.username;
 
   // Find the non-group rooms that the current user is in
   const userRooms = await Room.find()
@@ -102,9 +102,9 @@ exports.getDuo = asyncHandler(async (req, res) => {
   );
 
   if (!duoRoom) {
-    return res.status(404).send({
-      errors: [{ title: 'No non-group room found with this person' }],
-    });
+    // The room was not found, but 404 is not appropriate, since there is no
+    // error here. There's no duo room with these users and that's valid.
+    return res.status(204).send();
   }
   return res.send(duoRoom);
 });
@@ -188,8 +188,9 @@ exports.addMembers = asyncHandler(async (req, res) => {
 
     await room.save();
 
-    const { members } = room;
-    return res.send({ members });
+    // const { members } = room;
+    // const filteredRoom = { _id: room._id, members: room.members}
+    return res.send(room);
   } catch (error) {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
   }
