@@ -26,18 +26,18 @@ function startSocket(httpServer) {
     socket.on('listen-for-messages', () => {
       // Watch the database, emit new messages in this room.
       // NOTE: This won't scale well: the watch function watches ALL rooms.
-      // TODO: filter rooms to watch beforehand using a pipeline or .where
       Room.watch().on('change', async (data) => {
+        /* Ignore change if any of these 3 things are the case */
+        // The change didn't happen in this room
         const roomId = data.documentKey._id.toString();
-
-        /* Ignore change on two conditions */
-        // If the message was not sent in this room
         if (!Array.from(socket.rooms).includes(roomId)) return;
-        // If the description is undefined, the room no longer exists.
+        // The room no longer exists
         if (data.updateDescription === undefined) return;
-
-        // Get the updated fields and deconstruct the message from it.
+        // The change is not a message (for example, the member list changed)
         const { updatedFields } = data.updateDescription;
+        if (!Object.keys(updatedFields).toString().match('message')) return;
+
+        // Deconstruct the message from the updatedFields
         const { __v, ...nestedMessage } = updatedFields;
 
         // If there are no messages yet, mongoose passes an array with the new
