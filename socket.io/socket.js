@@ -59,7 +59,7 @@ function startSocket(httpServer) {
         // Emit message to room
         io.to(roomId).emit('new-message', {
           dateCreated,
-          author: username,
+          author: { _id: authorId, username },
           content,
           _id,
         });
