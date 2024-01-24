@@ -3,6 +3,7 @@ const findUser = require('../utils/findUser');
 const Room = require('../models/room');
 const getAuthorizedRoom = require('../utils/getAuthorizedRoom');
 const handleBadRoomRequest = require('../utils/handleBadRoomRequest');
+const User = require('../models/user');
 
 exports.getUserRooms = asyncHandler(async (req, res) => {
   const userId = req.user._id;
@@ -133,6 +134,22 @@ exports.addMembers = asyncHandler(async (req, res) => {
   const userId = req.user._id.toString();
 
   try {
+    // Check whether all proposed members exist before adding them
+    // Map the members. Members that do not exist will be null (which is falsy)
+    const newMembersMapped = await Promise.all(
+      newMembers.map(async (member) => User.findById(member).exec()),
+    );
+
+    // Check if all members are truthy
+    if (!newMembersMapped.every((member) => member))
+      return res.status(404).send({
+        errors: [
+          {
+            title: 'Could not find all of the requested new members.',
+          },
+        ],
+      });
+
     const room = await getAuthorizedRoom(roomId, userId, res);
     if (!room) return handleBadRoomRequest(res);
 
@@ -186,8 +203,6 @@ exports.addMembers = asyncHandler(async (req, res) => {
 
     await room.save();
 
-    // const { members } = room;
-    // const filteredRoom = { _id: room._id, members: room.members}
     return res.send(room);
   } catch (error) {
     return res.status(500).send({ errors: [{ title: 'Database error' }] });
