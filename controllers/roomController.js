@@ -152,10 +152,8 @@ exports.addMembers = asyncHandler(async (req, res) => {
       });
     }
 
-    // Ensure only 1 non-group conversation exists per duo. Only need to check
-    // this if there's just 1 member being added, because group rooms have no
-    // member limits.
-    if (newMembers.length === 1) {
+    // Ensure only 1 non-group conversation exists per duo.
+    if (newMembers.length === 1 && !room.isGroup) {
       // Find the non-group rooms that the current user is in
       const userRooms = await Room.find()
         .where('members', userId)
