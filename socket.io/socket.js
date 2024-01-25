@@ -22,15 +22,15 @@ function startSocket(httpServer) {
     });
   });
 
-  // Watch the database, emit new messages in the room with a change
-  Room.watch().on('change', async (data) => {
-    /* Ignore change if any of these 2 things are the case */
-    // The room was deleted
-    if (data.updateDescription === undefined) return;
-    // The change is not a message (for example, the member list changed)
-    const { updatedFields } = data.updateDescription;
-    if (!Object.keys(updatedFields).toString().match('message')) return;
+  function handleRoomDeleted(roomId) {
+    io.to(roomId).emit('room-deleted');
+  }
 
+  function handleMembersChanged(roomId) {
+    io.to(roomId).emit('members-changed');
+  }
+
+  async function handleNewMessage(updatedFields, roomId) {
     // Deconstruct the message from the updatedFields
     const { __v, ...nestedMessage } = updatedFields;
 
@@ -50,7 +50,6 @@ function startSocket(httpServer) {
     const _id = newMessage[0]._id.toString();
 
     // Emit message to room
-    const roomId = data.documentKey._id.toString();
     io.to(roomId).emit('new-message', {
       dateCreated,
       author: { _id: authorId, username },
@@ -58,6 +57,32 @@ function startSocket(httpServer) {
       _id,
     });
     console.log(`Emitted new message to room ${roomId}`);
+  }
+
+  // Watch the rooms in the database and act accordingly to changes
+  Room.watch().on('change', async (data) => {
+    const roomId = data.documentKey._id.toString();
+
+    // The room was deleted. This check must happen first because it checks for
+    // an undefined updateDescription.
+    if (data.updateDescription === undefined) {
+      handleRoomDeleted(roomId);
+      return;
+    }
+
+    // The members have changed
+    const { updatedFields } = data.updateDescription;
+    if (Object.keys(updatedFields).toString().match('members')) {
+      handleMembersChanged(roomId);
+      return;
+    }
+
+    // Safeguard against possible other changes that might occur. The message
+    // handler won't be able to process that.
+    if (!Object.keys(updatedFields).toString().match('message')) return;
+
+    // Received new mesage
+    handleNewMessage(updatedFields, roomId);
   });
 }
 
