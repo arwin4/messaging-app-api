@@ -10,8 +10,6 @@ function startSocket(httpServer) {
     },
   });
 
-  console.log('Socket.io server started.');
-
   io.on('connect', (socket) => {
     console.log('Someone connected to socket.');
 
@@ -62,5 +60,7 @@ function startSocket(httpServer) {
     console.log(`Emitted new message to room ${roomId}`);
   });
 }
+
+console.log('Socket.io server started.');
 
 module.exports = startSocket;
