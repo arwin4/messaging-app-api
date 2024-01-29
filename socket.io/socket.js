@@ -22,58 +22,76 @@ function startSocket(httpServer) {
     });
   });
 
-  function handleRoomDeleted(roomId) {
+  // TODO: authentication?
+
+  // Connect each user to their own private room. Any non-room-specific changes
+  // are emitted to it.
+  const userIo = io.of('/user');
+  userIo.on('connect', (socket) => {
+    socket.on('join-user-room', (userId) => {
+      socket.join(userId);
+    });
+  });
+
+  function handleRoomDeletion(roomId, data) {
+    // Emit to users
+    const documentBeforeChange = data.fullDocumentBeforeChange;
+    const { members } = documentBeforeChange;
+    const memberStrings = members.map((member) => member.toString());
+    memberStrings.forEach((member) => {
+      userIo.to(member).emit('rooms-changed');
+    });
+
+    // Emit to room
     io.to(roomId).emit('room-deleted');
   }
 
-  function handleMembersChanged(roomId) {
-    io.to(roomId).emit('members-changed');
-  }
+  function handleRoomUpdate(roomId, data) {
+    async function emitNewMessage(updatedFields, localRoomId) {
+      // Deconstruct the message from the updatedFields
+      const { __v, ...nestedMessage } = updatedFields;
 
-  async function handleNewMessage(updatedFields, roomId) {
-    // Deconstruct the message from the updatedFields
-    const { __v, ...nestedMessage } = updatedFields;
+      // If there are no messages yet, mongoose passes an array with the new
+      // message in it, so we must deconstruct it slightly differently
+      const newMessage = updatedFields.messages
+        ? Object.values(nestedMessage)[0]
+        : Object.values(nestedMessage);
 
-    // If there are no messages yet, mongoose passes an array with the new
-    // message in it, so we must deconstruct it slightly differently
-    const newMessage = updatedFields.messages
-      ? Object.values(nestedMessage)[0]
-      : Object.values(nestedMessage);
+      // Prepare the data to be emitted
+      // 'Populate' the author username manually
+      const authorId = newMessage[0].author.toString();
+      const author = await User.findById(authorId);
+      const { username } = author;
 
-    // Prepare the data to be emitted
-    // 'Populate' the author username manually
-    const authorId = newMessage[0].author.toString();
-    const author = await User.findById(authorId);
-    const { username } = author;
+      const { dateCreated, content } = newMessage[0];
+      const _id = newMessage[0]._id.toString();
 
-    const { dateCreated, content } = newMessage[0];
-    const _id = newMessage[0]._id.toString();
-
-    // Emit message to room
-    io.to(roomId).emit('new-message', {
-      dateCreated,
-      author: { _id: authorId, username },
-      content,
-      _id,
-    });
-    console.log(`Emitted new message to room ${roomId}`);
-  }
-
-  // Watch the rooms in the database and act accordingly to changes
-  Room.watch().on('change', async (data) => {
-    const roomId = data.documentKey._id.toString();
-
-    // The room was deleted. This check must happen first because it checks for
-    // an undefined updateDescription.
-    if (data.updateDescription === undefined) {
-      handleRoomDeleted(roomId);
-      return;
+      // Emit message to room
+      io.to(localRoomId).emit('new-message', {
+        dateCreated,
+        author: { _id: authorId, username },
+        content,
+        _id,
+      });
+      console.log(`Emitted new message to room ${localRoomId}`);
     }
 
+    function handleMembersChanged(members, localRoomId) {
+      // Emit to users
+      members.forEach((member) => {
+        userIo.to(member.toString()).emit('rooms-changed');
+      });
+
+      // Emit to room
+      io.to(localRoomId).emit('members-changed');
+    }
+
+    // Detect the type of update
     // The members have changed
     const { updatedFields } = data.updateDescription;
     if (Object.keys(updatedFields).toString().match('members')) {
-      handleMembersChanged(roomId);
+      const { members } = data.fullDocument;
+      handleMembersChanged(members, roomId);
       return;
     }
 
@@ -82,7 +100,28 @@ function startSocket(httpServer) {
     if (!Object.keys(updatedFields).toString().match('message')) return;
 
     // Received new mesage
-    handleNewMessage(updatedFields, roomId);
+    emitNewMessage(updatedFields, roomId);
+  }
+
+  // Watch the rooms in the database and act accordingly to changes
+  Room.watch([], {
+    fullDocumentBeforeChange: 'required',
+    fullDocument: 'whenAvailable',
+  }).on('change', async (data) => {
+    const roomId = data.documentKey._id.toString();
+    // Detect type of change to room document
+    switch (data.operationType) {
+      case 'delete':
+        handleRoomDeletion(roomId, data);
+        break;
+      case 'update':
+        handleRoomUpdate(roomId, data);
+        break;
+      // Other types of changes need not be handled
+      // 'insert' need not be handled; it will be followed by an update event
+      default:
+        break;
+    }
   });
 }
 
