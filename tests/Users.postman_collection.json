@@ -1,498 +1,449 @@
 {
-	"info": {
-		"_postman_id": "c5bcfa1f-edb9-4c21-b992-be1c63cc6525",
-		"name": "Users",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "30981832"
-	},
-	"item": [
-		{
-			"name": "Friends",
-			"item": [
-				{
-					"name": "Add friend (same as user)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
-									"        pm.expect(pm.response.text()).to.include(`errors`);\r",
-									"        pm.expect(pm.response.text()).to.include(`You cannot add yourself as a friend`);\r",
-									"    });\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"// email = pm.variables.replaceIn(\"{{$randomEmail}}\")"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"newFriend\": \"test-run\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{domain}}/friends/",
-							"host": [
-								"{{domain}}"
-							],
-							"path": [
-								"friends",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add friend",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Returns friend list with new friend in it\", function () {\r",
-									"        pm.expect(pm.response.text()).to.include(`friends`);\r",
-									"        pm.expect(pm.response.text()).to.include(`the count`);\r",
-									"    });\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"newFriend\": \"the count\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{domain}}/friends/",
-							"host": [
-								"{{domain}}"
-							],
-							"path": [
-								"friends",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Add friend (inexistent user)",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
-									"        pm.expect(pm.response.text()).to.include(`errors`);\r",
-									"        pm.expect(pm.response.text()).to.include(`This user does not exist`);\r",
-									"    });\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"newFriend\": \"does-not-exist\"\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{domain}}/friends/",
-							"host": [
-								"{{domain}}"
-							],
-							"path": [
-								"friends",
-								""
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Delete friend",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
-									"        pm.expect(pm.response.text()).to.include(`friends`);\r",
-									"        pm.expect(pm.response.text()).to.not.include(`the count`);\r",
-									"    });\r",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"auth": {
-							"type": "bearer",
-							"bearer": [
-								{
-									"key": "token",
-									"value": "{{jwt}}",
-									"type": "string"
-								}
-							]
-						},
-						"method": "DELETE",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n    \"friendsToDelete\": [\"the count\"]\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{domain}}/friends/",
-							"host": [
-								"{{domain}}"
-							],
-							"path": [
-								"friends",
-								""
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "Get user",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Returns user info\", function () {\r",
-							"        pm.expect(pm.response.text()).to.include(`\"_id\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"username\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"exists\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"friends\"`);\r",
-							"        pm.expect(pm.response.text()).to.include(`\"isBot\"`);\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{domain}}/users/exists",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"users",
-						"exists"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get current user",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Responds with correctly formatted user object\", function () {\r",
-							"        pm.expect(pm.response.text()).to.include(`user`);\r",
-							"        pm.expect(pm.response.text()).to.include(`dateCreated`);\r",
-							"        pm.expect(pm.response.text()).to.include(`friends`);\r",
-							"        pm.expect(pm.response.json().user._id).to.equal('6594237cbe004b04c4972ee5');   \r",
-							"        pm.expect(pm.response.json().user.username).to.equal('test-run');   \r",
-							"    });\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{domain}}/users/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"users",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get inexistent user",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Rejects request for inexistent user\", function () {\r",
-							"    pm.response.to.have.body({\r",
-							"    \"errors\": [\r",
-							"        {\r",
-							"            \"title\": \"User does not exist\"\r",
-							"        }\r",
-							"    ]\r",
-							"});\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "bearer",
-					"bearer": [
-						{
-							"key": "token",
-							"value": "{{jwt}}",
-							"type": "string"
-						}
-					]
-				},
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{domain}}/users/does-not-exist",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"users",
-						"does-not-exist"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create user",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"pm.environment.set(\"randomUsername\", _.random(1,1000000))"
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Creates user\", function () {\r",
-							"        pm.expect(pm.response.text()).to.include(\"User created.\");\r",
-							"});\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": \"{{randomUsername}}\",\r\n    \"password\": \"abc\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/users/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"users",
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Create user (password too short)",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							"pm.environment.set(\"randomUsername\", _.random(1,1000000))\r",
-							""
-						],
-						"type": "text/javascript"
-					}
-				},
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"pm.test(\"Rejects password that is too short\", function () {\r",
-							"    pm.response.to.have.body(\r",
-							"{\r",
-							"    \"errors\": [\r",
-							"        {\r",
-							"            \"title\": \"Password must be between 3 and 100 characters long\"\r",
-							"        }\r",
-							"    ]\r",
-							"}\r",
-							");\r",
-							"});"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"username\": {{randomUsername}},\r\n    \"password\": \"ab\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{domain}}/users/",
-					"host": [
-						"{{domain}}"
-					],
-					"path": [
-						"users",
-						""
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "c5bcfa1f-edb9-4c21-b992-be1c63cc6525",
+    "name": "Users",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "30981832"
+  },
+  "item": [
+    {
+      "name": "Friends",
+      "item": [
+        {
+          "name": "Add friend (same as user)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
+                  "        pm.expect(pm.response.text()).to.include(`errors`);\r",
+                  "        pm.expect(pm.response.text()).to.include(`You cannot add yourself as a friend`);\r",
+                  "    });\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            },
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "// email = pm.variables.replaceIn(\"{{$randomEmail}}\")"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"newFriend\": \"test-run\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{domain}}/friends/",
+              "host": ["{{domain}}"],
+              "path": ["friends", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add friend",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Returns friend list with new friend in it\", function () {\r",
+                  "        pm.expect(pm.response.text()).to.include(`friends`);\r",
+                  "        pm.expect(pm.response.text()).to.include(`the count`);\r",
+                  "    });\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"newFriend\": \"the count\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{domain}}/friends/",
+              "host": ["{{domain}}"],
+              "path": ["friends", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add friend (inexistent user)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
+                  "        pm.expect(pm.response.text()).to.include(`errors`);\r",
+                  "        pm.expect(pm.response.text()).to.include(`This user does not exist`);\r",
+                  "    });\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"newFriend\": \"does-not-exist\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{domain}}/friends/",
+              "host": ["{{domain}}"],
+              "path": ["friends", ""]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete friend",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Refuses to add the user themselves a friend\", function () {\r",
+                  "        pm.expect(pm.response.text()).to.include(`friends`);\r",
+                  "        pm.expect(pm.response.text()).to.not.include(`the count`);\r",
+                  "    });\r",
+                  ""
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"friendsToDelete\": [\"the count\"]\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{domain}}/friends/",
+              "host": ["{{domain}}"],
+              "path": ["friends", ""]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Get user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Returns user info\", function () {\r",
+              "        pm.expect(pm.response.text()).to.include(`\"_id\"`);\r",
+              "        pm.expect(pm.response.text()).to.include(`\"username\"`);\r",
+              "        pm.expect(pm.response.text()).to.include(`\"exists\"`);\r",
+              "        pm.expect(pm.response.text()).to.include(`\"dateCreated\"`);\r",
+              "        pm.expect(pm.response.text()).to.include(`\"friends\"`);\r",
+              "        pm.expect(pm.response.text()).to.include(`\"isBot\"`);\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [""],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{domain}}/users/exists",
+          "host": ["{{domain}}"],
+          "path": ["users", "exists"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get current user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Responds with correctly formatted user object\", function () {\r",
+              "        pm.expect(pm.response.text()).to.include(`user`);\r",
+              "        pm.expect(pm.response.text()).to.include(`dateCreated`);\r",
+              "        pm.expect(pm.response.text()).to.include(`friends`);\r",
+              "        pm.expect(pm.response.json()._id).to.equal('6594237cbe004b04c4972ee5');   \r",
+              "        pm.expect(pm.response.json().username).to.equal('test-run');   \r",
+              "    });\r",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [""],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{domain}}/users/",
+          "host": ["{{domain}}"],
+          "path": ["users", ""]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get inexistent user",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Rejects request for inexistent user\", function () {\r",
+              "    pm.response.to.have.body({\r",
+              "    \"errors\": [\r",
+              "        {\r",
+              "            \"title\": \"User does not exist\"\r",
+              "        }\r",
+              "    ]\r",
+              "});\r",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "bearer",
+          "bearer": [
+            {
+              "key": "token",
+              "value": "{{jwt}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{domain}}/users/does-not-exist",
+          "host": ["{{domain}}"],
+          "path": ["users", "does-not-exist"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create user",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.environment.set(\"randomUsername\", _.random(1,1000000))"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Creates user\", function () {\r",
+              "        pm.expect(pm.response.text()).to.include(\"User created.\");\r",
+              "});\r",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\": \"{{randomUsername}}\",\r\n    \"password\": \"abc\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{domain}}/users/",
+          "host": ["{{domain}}"],
+          "path": ["users", ""]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create user (password too short)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.environment.set(\"randomUsername\", _.random(1,1000000))\r",
+              ""
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Rejects password that is too short\", function () {\r",
+              "    pm.response.to.have.body(\r",
+              "{\r",
+              "    \"errors\": [\r",
+              "        {\r",
+              "            \"title\": \"Password must be between 3 and 100 characters long\"\r",
+              "        }\r",
+              "    ]\r",
+              "}\r",
+              ");\r",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"username\": {{randomUsername}},\r\n    \"password\": \"ab\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{domain}}/users/",
+          "host": ["{{domain}}"],
+          "path": ["users", ""]
+        }
+      },
+      "response": []
+    }
+  ]
 }

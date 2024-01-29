@@ -70,7 +70,5 @@ exports.getUser = asyncHandler(async (req, res) => {
 exports.getCurrentUser = asyncHandler(async (req, res) => {
   const { _id, username, dateCreated, friends } = req.user;
 
-  return res.send({
-    user: { _id, username, dateCreated, friends },
-  });
+  return res.send({ _id, username, dateCreated, friends });
 });
