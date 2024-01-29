@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler');
 const getAuthorizedRoom = require('../utils/getAuthorizedRoom');
 const handleBadRoomRequest = require('../utils/handleBadRoomRequest');
+const sleep = require('../utils/sleep');
 
 exports.getMessages = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
@@ -75,6 +76,9 @@ exports.sendMessage = asyncHandler(async (req, res) => {
           roomId,
         },
       };
+
+      await sleep(500);
+
       return this.sendMessage(newReq, res);
     }
 
