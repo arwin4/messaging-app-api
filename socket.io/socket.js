@@ -87,20 +87,18 @@ function startSocket(httpServer) {
     }
 
     // Detect the type of update
-    // The members have changed
     const { updatedFields } = data.updateDescription;
     if (Object.keys(updatedFields).toString().match('members')) {
+      // The members have changed
       const { members } = data.fullDocument;
       handleMembersChanged(members, roomId);
-      return;
+    } else if (Object.keys(updatedFields).toString().match('message')) {
+      // Received new mesage
+      emitNewMessage(updatedFields, roomId);
     }
 
-    // Safeguard against possible other changes that might occur. The message
-    // handler won't be able to process that.
-    if (!Object.keys(updatedFields).toString().match('message')) return;
-
-    // Received new mesage
-    emitNewMessage(updatedFields, roomId);
+    // Other cases may occur that are not triggered by these conditionals, but
+    // they are safe to leave unhandled.
   }
 
   // Watch the rooms in the database and act accordingly to changes
