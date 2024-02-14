@@ -57,7 +57,7 @@ exports.sendMessage = asyncHandler(async (req, res) => {
 
       // Compose message
       let countMessage;
-      if (messagesByTheCount === 2) {
+      if (messagesNotByTheCount === 3) {
         countMessage = '3! Ah ah ah!!';
       } else {
         countMessage = `${messagesNotByTheCount}!`;
