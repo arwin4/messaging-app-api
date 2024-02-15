@@ -13,9 +13,9 @@ To run the Auth collection, run the following in your terminal:
 When running locally, the domain will be `http://localhost:3000`.
 The JWT expires after 24 hours, so you'll need to repeat this step after this time has passed, or the other collection runs will fail.
 
-### Running the Users and Messages collections
+### Running the Users collection
 
-You can now run the Users and Messages collections by passing the acquired JWT on the command line. For example:
+You can now run the Users collection by passing the acquired JWT on the command line. For example:
 
 `postman collection run tests/Users.postman_collection.json --env-var "domain=http://localhost:3000" --env-var "JWT=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InRlc3QtcnVuIiwiaWF0IjoxNzA1MzEyMDE3LCJleHAiOjE3MDUzOTg0MTd9.DmZaVITxIDfs4AdvNC9zb1COd-JEqPlDqFb6iYpGkSE"`
 
