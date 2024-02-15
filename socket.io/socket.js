@@ -33,19 +33,6 @@ function startSocket(httpServer) {
     });
   });
 
-  function handleRoomDeletion(roomId, data) {
-    // Emit to users
-    const documentBeforeChange = data.fullDocumentBeforeChange;
-    const { members } = documentBeforeChange;
-    const memberStrings = members.map((member) => member.toString());
-    memberStrings.forEach((member) => {
-      userIo.to(member).emit('rooms-changed');
-    });
-
-    // Emit to room
-    io.to(roomId).emit('room-deleted');
-  }
-
   function handleRoomUpdate(roomId, data) {
     async function emitNewMessage(updatedFields, localRoomId) {
       // Deconstruct the message from the updatedFields
@@ -76,7 +63,7 @@ function startSocket(httpServer) {
       console.log(`Emitted new message to room ${localRoomId}`);
     }
 
-    function handleMembersChanged(members, localRoomId) {
+    function emitMembersChanged(members, localRoomId) {
       // Emit to users
       members.forEach((member) => {
         userIo.to(member.toString()).emit('rooms-changed');
@@ -91,13 +78,10 @@ function startSocket(httpServer) {
     }
 
     // Detect the type of update
-    // TODO: clean up decision tree
     const { updatedFields } = data.updateDescription;
-    console.log(Object.entries(updatedFields));
     if (Object.keys(updatedFields).toString().match('members')) {
-      // The members have changed
       const { members } = data.fullDocument;
-      handleMembersChanged(members, roomId);
+      emitMembersChanged(members, roomId);
     } else if (
       Object.entries(updatedFields).some(
         ([key, value]) => key === 'messages' && value.length === 0,
@@ -105,12 +89,24 @@ function startSocket(httpServer) {
     ) {
       emitClearMessages(roomId);
     } else if (Object.keys(updatedFields).toString().match('message')) {
-      // Received new mesage
       emitNewMessage(updatedFields, roomId);
     }
 
-    // Other cases may occur that are not triggered by these conditionals, but
-    // they are safe to leave unhandled.
+    // Other cases may occur that are not matched by these conditionals, but
+    // these don't need to be emitted.
+  }
+
+  function handleRoomDeletion(roomId, data) {
+    // Emit to users
+    const documentBeforeChange = data.fullDocumentBeforeChange;
+    const { members } = documentBeforeChange;
+    const memberStrings = members.map((member) => member.toString());
+    memberStrings.forEach((member) => {
+      userIo.to(member).emit('rooms-changed');
+    });
+
+    // Emit to room
+    io.to(roomId).emit('room-deleted');
   }
 
   // Watch the rooms in the database and act accordingly to changes
