@@ -86,12 +86,24 @@ function startSocket(httpServer) {
       io.to(localRoomId).emit('members-changed');
     }
 
+    function emitClearMessages(localRoomId) {
+      io.to(localRoomId).emit('messages-cleared');
+    }
+
     // Detect the type of update
+    // TODO: clean up decision tree
     const { updatedFields } = data.updateDescription;
+    console.log(Object.entries(updatedFields));
     if (Object.keys(updatedFields).toString().match('members')) {
       // The members have changed
       const { members } = data.fullDocument;
       handleMembersChanged(members, roomId);
+    } else if (
+      Object.entries(updatedFields).some(
+        ([key, value]) => key === 'messages' && value.length === 0,
+      )
+    ) {
+      emitClearMessages(roomId);
     } else if (Object.keys(updatedFields).toString().match('message')) {
       // Received new mesage
       emitNewMessage(updatedFields, roomId);
