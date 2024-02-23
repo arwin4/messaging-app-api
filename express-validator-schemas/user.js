@@ -3,8 +3,8 @@ const userSchema = {
     trim: true,
     escape: true,
     isLength: {
-      options: { max: 100 },
-      errorMessage: 'Username may be no longer than 100 characters',
+      options: { max: 12 },
+      errorMessage: 'Username may be no longer than 12 characters',
     },
   },
   password: {
