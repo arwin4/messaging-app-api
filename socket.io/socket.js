@@ -22,8 +22,6 @@ function startSocket(httpServer) {
     });
   });
 
-  // TODO: authentication?
-
   // Connect each user to their own private room. Any non-room-specific changes
   // are emitted to it.
   const userIo = io.of('/user');
