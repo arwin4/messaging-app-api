@@ -1,6 +1,6 @@
 General usage of the Postman CLI:
 
-`postman collection run  tests/COLLECTION --env-var "domain=DOMAIN" --env-var "JWT=TOKEN"`
+`postman collection run tests/COLLECTION --env-var "domain=DOMAIN" --env-var "JWT=TOKEN"`
 
 ### Running the Auth collection and getting a JWT for the other collections
 
@@ -8,7 +8,7 @@ To test the routes needing authentication, you must first run the Auth collectio
 
 To run the Auth collection, run the following in your terminal:
 
-`postman collection tests/Auth.postman_collection.json --env-var-"domain=DOMAIN"`
+`postman collection run tests/Auth.postman_collection.json --env-var "domain=DOMAIN"`
 
 When running locally, the domain will be `http://localhost:3000`.
 The JWT expires after 24 hours, so you'll need to repeat this step after this time has passed, or the other collection runs will fail.
