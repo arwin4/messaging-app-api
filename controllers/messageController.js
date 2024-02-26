@@ -22,6 +22,45 @@ exports.getMessages = asyncHandler(async (req, res) => {
   }
 });
 
+// The Count bot. Respond with a bot message if 'The Count' is present in the room.
+async function runTheCountBot(room, userId) {
+  const theCountUserId = '65a3ca1d625894cbba68610e';
+
+  // The second condition prevents The Count from responding to its own messages
+  if (room.members.includes(theCountUserId) && userId !== theCountUserId) {
+    // Calculate count
+    const totalMessagesInRoom = room.messages.length;
+    const messagesByTheCount = room.messages.filter(
+      (curMessage) => curMessage.author.toString() === theCountUserId,
+    ).length;
+    const messagesNotByTheCount = totalMessagesInRoom - messagesByTheCount;
+
+    // Compose message
+    let countMessageContent;
+    if (messagesNotByTheCount === 3) {
+      countMessageContent = '3! Ah ah ah!!';
+    } else {
+      countMessageContent = `${messagesNotByTheCount}!`;
+    }
+
+    const countMessage = {
+      dateCreated: Date.now(),
+      author: theCountUserId,
+      content: {
+        isText: true,
+        isImage: false,
+        textContent: countMessageContent,
+      },
+    };
+
+    room.messages.push(countMessage);
+
+    // Delay slightly for visual clarity
+    await sleep(500);
+    await room.save();
+  }
+}
+
 exports.sendMessage = [
   checkSchema(messageSchema),
 
@@ -59,44 +98,7 @@ exports.sendMessage = [
 
       await room.save();
 
-      // The Count bot. Respond with a bot message if 'The Count' is present in the room.
-      const theCountUserId = '65a3ca1d625894cbba68610e';
-
-      // The second condition prevents The Count from responding to its own messages
-      if (room.members.includes(theCountUserId) && userId !== theCountUserId) {
-        // Calculate count
-        const totalMessagesInRoom = room.messages.length;
-        const messagesByTheCount = room.messages.filter(
-          (curMessage) => curMessage.author.toString() === theCountUserId,
-        ).length;
-        const messagesNotByTheCount = totalMessagesInRoom - messagesByTheCount;
-
-        // Compose message
-        let countMessage;
-        if (messagesNotByTheCount === 3) {
-          countMessage = '3! Ah ah ah!!';
-        } else {
-          countMessage = `${messagesNotByTheCount}!`;
-        }
-
-        const newReq = {
-          body: {
-            isText: true,
-            isImage: false,
-            textContent: countMessage,
-          },
-          user: {
-            _id: theCountUserId,
-          },
-          params: {
-            roomId,
-          },
-        };
-
-        await sleep(500);
-
-        return this.sendMessage(newReq, res);
-      }
+      runTheCountBot(room, userId);
 
       return res.send({ message });
     } catch (error) {
