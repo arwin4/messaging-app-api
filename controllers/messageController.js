@@ -1,7 +1,10 @@
 const asyncHandler = require('express-async-handler');
+const { checkSchema } = require('express-validator');
 const getAuthorizedRoom = require('../utils/getAuthorizedRoom');
 const handleBadRoomRequest = require('../utils/handleBadRoomRequest');
 const sleep = require('../utils/sleep');
+const messageSchema = require('../express-validator-schemas/message');
+const respondOnValidationError = require('../utils/respondOnValidationError');
 
 exports.getMessages = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
@@ -19,74 +22,82 @@ exports.getMessages = asyncHandler(async (req, res) => {
   }
 });
 
-exports.sendMessage = asyncHandler(async (req, res) => {
-  const { isText, isImage, textContent, imageUrl } = req.body;
-  const { roomId } = req.params;
-  const userId = req.user._id.toString();
+exports.sendMessage = [
+  checkSchema(messageSchema),
 
-  try {
-    const room = await getAuthorizedRoom(roomId, userId, res);
-    if (!room) return handleBadRoomRequest(res);
+  asyncHandler(async (req, res, next) => {
+    respondOnValidationError(req, res, next);
+  }),
 
-    const message = {
-      dateCreated: Date.now(),
-      author: req.user._id,
-      content: {
-        isText: !!isText,
-        isImage: !!isImage,
-        textContent,
-        imageUrl,
-      },
-    };
+  asyncHandler(async (req, res) => {
+    const { isText, isImage, textContent, imageUrl } = req.body;
+    const { roomId } = req.params;
+    const userId = req.user._id.toString();
 
-    room.messages.push(message);
+    try {
+      const room = await getAuthorizedRoom(roomId, userId, res);
+      if (!room) return handleBadRoomRequest(res);
 
-    await room.save();
-
-    // The Count bot. Respond with a bot message if 'The Count' is present in the room.
-    const theCountUserId = '65a3ca1d625894cbba68610e';
-
-    // The second condition prevents The Count from responding to its own messages
-    if (room.members.includes(theCountUserId) && userId !== theCountUserId) {
-      // Calculate count
-      const totalMessagesInRoom = room.messages.length;
-      const messagesByTheCount = room.messages.filter(
-        (curMessage) => curMessage.author.toString() === theCountUserId,
-      ).length;
-      const messagesNotByTheCount = totalMessagesInRoom - messagesByTheCount;
-
-      // Compose message
-      let countMessage;
-      if (messagesNotByTheCount === 3) {
-        countMessage = '3! Ah ah ah!!';
-      } else {
-        countMessage = `${messagesNotByTheCount}!`;
-      }
-
-      const newReq = {
-        body: {
-          isText: true,
-          isImage: false,
-          textContent: countMessage,
-        },
-        user: {
-          _id: theCountUserId,
-        },
-        params: {
-          roomId,
+      const message = {
+        dateCreated: Date.now(),
+        author: req.user._id,
+        content: {
+          isText: !!isText,
+          isImage: !!isImage,
+          textContent,
+          imageUrl,
         },
       };
 
-      await sleep(500);
+      room.messages.push(message);
 
-      return this.sendMessage(newReq, res);
+      await room.save();
+
+      // The Count bot. Respond with a bot message if 'The Count' is present in the room.
+      const theCountUserId = '65a3ca1d625894cbba68610e';
+
+      // The second condition prevents The Count from responding to its own messages
+      if (room.members.includes(theCountUserId) && userId !== theCountUserId) {
+        // Calculate count
+        const totalMessagesInRoom = room.messages.length;
+        const messagesByTheCount = room.messages.filter(
+          (curMessage) => curMessage.author.toString() === theCountUserId,
+        ).length;
+        const messagesNotByTheCount = totalMessagesInRoom - messagesByTheCount;
+
+        // Compose message
+        let countMessage;
+        if (messagesNotByTheCount === 3) {
+          countMessage = '3! Ah ah ah!!';
+        } else {
+          countMessage = `${messagesNotByTheCount}!`;
+        }
+
+        const newReq = {
+          body: {
+            isText: true,
+            isImage: false,
+            textContent: countMessage,
+          },
+          user: {
+            _id: theCountUserId,
+          },
+          params: {
+            roomId,
+          },
+        };
+
+        await sleep(500);
+
+        return this.sendMessage(newReq, res);
+      }
+
+      return res.send({ message });
+    } catch (error) {
+      return res.status(500).send({ errors: [{ title: 'Database error' }] });
     }
-
-    return res.send({ message });
-  } catch (error) {
-    return res.status(500).send({ errors: [{ title: 'Database error' }] });
-  }
-});
+  }),
+];
 
 exports.deleteMessages = asyncHandler(async (req, res) => {
   const { roomId } = req.params;
