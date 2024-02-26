@@ -34,6 +34,12 @@ exports.sendMessage = [
     const { roomId } = req.params;
     const userId = req.user._id.toString();
 
+    if ((!isText && !isImage) || (isText && isImage)) {
+      return res.status(400).send({
+        errors: [{ title: 'Exactly one of isText and isImage must be true' }],
+      });
+    }
+
     try {
       const room = await getAuthorizedRoom(roomId, userId, res);
       if (!room) return handleBadRoomRequest(res);
