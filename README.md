@@ -4,6 +4,8 @@ This is a backend implementation of [The Odin Project's full stack _Messaging Ap
 
 As the penultimate project in The Odin Project's curriculum, it showcases a ton of what I've learned during the course. Some of the highlights are listed below.
 
+You might like to check out [the frontend](https://github.com/arwin4/messaging-app) as well.
+
 ## Some notable features
 
 - A socket.io server running alongside the API to send live chat updates to clients
