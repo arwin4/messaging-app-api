@@ -58,7 +58,6 @@ function startSocket(httpServer) {
         content,
         _id,
       });
-      console.log(`Emitted new message to room ${localRoomId}`);
     }
 
     function emitMembersChanged(members, localRoomId) {
