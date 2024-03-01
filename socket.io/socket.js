@@ -22,8 +22,14 @@ function startSocket(httpServer) {
     });
   });
 
-  // Connect each user to their own private room. Any non-room-specific changes
-  // are emitted to it.
+  /**
+   * Connect each user to their own private room. Any non-room-specific changes
+   * are emitted to it.
+   *
+   * NOTE: there is no authorization here! A client could request to join any
+   * arbitrary user's private socket room using another user's id, allowing them
+   * to spy on anything transmitted to that user.
+   */
   const userIo = io.of('/user');
   userIo.on('connect', (socket) => {
     socket.on('join-user-room', (userId) => {
