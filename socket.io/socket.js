@@ -14,7 +14,7 @@ function startSocket(httpServer) {
     console.log('Someone connected to socket.');
 
     socket.on('join-room', (room) => {
-      console.log('Someone joined a room.');
+      console.log('Someone joined room', room);
       // Let client join room, but only if they have not been added already
       if (socket.rooms.size === 1) {
         socket.join(room);
@@ -33,12 +33,14 @@ function startSocket(httpServer) {
   const userIo = io.of('/user');
   userIo.on('connect', (socket) => {
     socket.on('join-user-room', (userId) => {
+      console.log('Someone joined user room', userId);
       socket.join(userId);
     });
   });
 
   function handleRoomUpdate(roomId, data) {
     async function emitNewMessage(updatedFields, localRoomId) {
+      console.log('Handling new message in', roomId);
       // Deconstruct the message from the updatedFields
       const { __v, ...nestedMessage } = updatedFields;
 
@@ -67,6 +69,7 @@ function startSocket(httpServer) {
     }
 
     function emitMembersChanged(members, localRoomId) {
+      console.log('Handling member change in', roomId);
       // Emit to users
       members.forEach((member) => {
         userIo.to(member.toString()).emit('rooms-changed');
@@ -77,12 +80,15 @@ function startSocket(httpServer) {
     }
 
     function emitClearMessages(localRoomId) {
+      console.log('Handling message clear in', roomId);
       io.to(localRoomId).emit('messages-cleared');
     }
 
     // Detect the type of update
+    console.log('Detecting type of room update...');
     const { updatedFields } = data.updateDescription;
     if (Object.keys(updatedFields).toString().match('members')) {
+      console.log('Detected members change in', roomId);
       const { members } = data.fullDocument;
       emitMembersChanged(members, roomId);
     } else if (
@@ -90,8 +96,10 @@ function startSocket(httpServer) {
         ([key, value]) => key === 'messages' && value.length === 0,
       )
     ) {
+      console.log('Messages were cleared in', roomId);
       emitClearMessages(roomId);
     } else if (Object.keys(updatedFields).toString().match('message')) {
+      console.log('New message received in', roomId);
       emitNewMessage(updatedFields, roomId);
     }
 
@@ -100,6 +108,7 @@ function startSocket(httpServer) {
   }
 
   function handleRoomDeletion(roomId, data) {
+    console.log('Handling room deletion', roomId);
     // Emit to users
     const documentBeforeChange = data.fullDocumentBeforeChange;
     const { members } = documentBeforeChange;
@@ -114,21 +123,25 @@ function startSocket(httpServer) {
 
   // Watch the rooms in the database and act accordingly to changes
   Room.watch([], {
-    fullDocumentBeforeChange: 'required',
-    fullDocument: 'whenAvailable',
+    fullDocumentBeforeChange: 'whenAvailable',
+    fullDocument: 'updateLookup',
   }).on('change', async (data) => {
     const roomId = data.documentKey._id.toString();
     // Detect type of change to room document
+    console.log('Detecting type of room change...');
     switch (data.operationType) {
       case 'delete':
+        console.log('Room was deleted', roomId);
         handleRoomDeletion(roomId, data);
         break;
       case 'update':
+        console.log('Room was updated', roomId);
         handleRoomUpdate(roomId, data);
         break;
       // Other types of changes need not be handled
       // 'insert' need not be handled; it will be followed by an update event
       default:
+        console.log('A different type of change occurred.');
         break;
     }
   });
