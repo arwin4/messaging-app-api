@@ -5,6 +5,7 @@ const express = require('express');
 const path = require('path');
 const logger = require('morgan');
 const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
 const session = require('express-session');
 const passport = require('passport');
 
@@ -56,6 +57,8 @@ const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
 const roomRouter = require('./routes/room');
 const friendRouter = require('./routes/friend');
+// const connectToMongoAtlas = require('./mongoConfig');
+// const initializeMongoServer = require('./tests/mongoConfigTesting');
 
 app.use('/users/', userRouter);
 app.use('/auth/', authRouter);
@@ -78,26 +81,43 @@ app.use((err, req, res) => {
   res.render('error');
 });
 
-let mongoConnectionSuccessful = false;
+// let mongoConnectionSuccessful = false;
 
-async function connectToMongoAtlas() {
-  console.log('Connecting to MongoDB Atlas...');
-  try {
-    await mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
-    mongoConnectionSuccessful = true;
-  } catch (error) {
-    console.log(error);
-  }
-}
+// async function connectToMongoAtlas() {
+//   console.log('Connecting to MongoDB Atlas...');
+//   try {
+//     await mongoose.connect(process.env.MONGODB_CONNECTION_STRING);
+//     mongoConnectionSuccessful = true;
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
-connectToMongoAtlas()
-  .then(() => {
-    // eslint-disable-next-line no-unused-expressions
-    mongoConnectionSuccessful
-      ? console.log('Connection to MongoDB Atlas successful.')
-      : console.log('Connection to MongoDB Atlas FAILED.');
-    console.log('Server has finished starting.');
-  })
-  .catch((err) => console.log(err));
+// connectToMongoAtlas()
+//   .then(() => {
+//     // eslint-disable-next-line no-unused-expressions
+//     mongoConnectionSuccessful
+//       ? console.log('Connection to MongoDB Atlas successful.')
+//       : console.log('Connection to MongoDB Atlas FAILED.');
+//     console.log('Server has finished starting.');
+//   })
+//   .catch((err) => console.log(err));
+
+// async function initializeMongoServer() {
+//   const mongoServer = await MongoMemoryServer.create();
+//   const mongoUri = mongoServer.getUri();
+
+//   mongoose.connect(mongoUri);
+
+//   mongoose.connection.on('error', (e) => {
+//     if (e.message.code === 'ETIMEDOUT') {
+//       console.log(e);
+//       mongoose.connect(mongoUri);
+//     }
+//     console.log(e);
+//   });
+// }
+
+// initializeMongoServer();
 
 module.exports = app;

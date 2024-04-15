@@ -5,6 +5,11 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const verifyAuthorization = require('../passport/verifyAuthorization');
 
+// Test route
+router.get('/test', (req, res) => {
+  res.json({ name: 'testUser' });
+});
+
 // Get user
 router.get('/:username', verifyAuthorization, userController.getUser);
 
