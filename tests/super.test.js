@@ -56,18 +56,10 @@ test('get user route works', async () => {
   expect(res.body.username).toBe('testUser');
 });
 
-test.skip('signup works', (done) => {
-  request(app)
+test('signup works', async () => {
+  await request(app)
     .post('/')
-    .set('Content-Type', 'application/json')
+    .type('form')
     .send({ username: 'hello', password: 'abc' })
-    // .expect('Content-Type', /json/)
-    // .expect({
-    //   errors: [
-    //     {
-    //       title: 'Unauthorized',
-    //     },
-    //   ],
-    // })
-    .expect(401, done);
+    .expect(200);
 });
