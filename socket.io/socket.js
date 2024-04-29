@@ -145,6 +145,14 @@ function startSocket(httpServer) {
         break;
     }
   });
+
+  Room.watch([], {
+    fullDocumentBeforeChange: 'whenAvailable',
+    fullDocument: 'updateLookup',
+  }).on('close', async (data) => {
+    console.log('[DEBUG] close event');
+    console.log(data);
+  });
 }
 
 console.log('Socket.io server started.');
