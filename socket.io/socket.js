@@ -3,7 +3,11 @@ const { Server } = require('socket.io');
 const Room = require('../models/room');
 const User = require('../models/user');
 
+let resumeToken;
+
 function startSocket(httpServer) {
+  console.log('Starting socket.io server');
+
   const io = new Server(httpServer, {
     cors: {
       origin: process.env.CORS_ORIGIN,
@@ -121,38 +125,44 @@ function startSocket(httpServer) {
     io.to(roomId).emit('room-deleted');
   }
 
-  // Watch the rooms in the database and act accordingly to changes
-  Room.watch([], {
-    fullDocumentBeforeChange: 'whenAvailable',
-    fullDocument: 'updateLookup',
-  }).on('change', async (data) => {
-    const roomId = data.documentKey._id.toString();
-    // Detect type of change to room document
-    console.log('Detecting type of room change...');
-    switch (data.operationType) {
-      case 'delete':
-        console.log('Room was deleted', roomId);
-        handleRoomDeletion(roomId, data);
-        break;
-      case 'update':
-        console.log('Room was updated', roomId);
-        handleRoomUpdate(roomId, data);
-        break;
-      // Other types of changes need not be handled
-      // 'insert' need not be handled; it will be followed by an update event
-      default:
-        console.log('A different type of change occurred.');
-        break;
-    }
-  });
+  function watchRooms() {
+    // Watch the rooms in the database and act accordingly to changes
+    Room.watch([], {
+      fullDocumentBeforeChange: 'whenAvailable',
+      fullDocument: 'updateLookup',
+    }).on('change', async (data) => {
+      const roomId = data.documentKey._id.toString();
+      // Detect type of change to room document
+      console.log('Detecting type of room change...');
+      switch (data.operationType) {
+        case 'delete':
+          console.log('Room was deleted', roomId);
+          handleRoomDeletion(roomId, data);
+          break;
+        case 'update':
+          console.log('Room was updated', roomId);
+          handleRoomUpdate(roomId, data);
+          break;
+        // Other types of changes need not be handled
+        // 'insert' need not be handled; it will be followed by an update event
+        default:
+          console.log('A different type of change occurred.');
+          break;
+      }
+    });
 
-  Room.watch([], {
-    fullDocumentBeforeChange: 'whenAvailable',
-    fullDocument: 'updateLookup',
-  }).on('close', async (data) => {
-    console.log('[DEBUG] close event');
-    console.log(data);
-  });
+    Room.watch([], {
+      fullDocumentBeforeChange: 'whenAvailable',
+      fullDocument: 'updateLookup',
+    }).on('close', async (data) => {
+      console.log('[DEBUG] close event');
+      watchRooms();
+    });
+
+    console.log('Started watching rooms.');
+  }
+
+  watchRooms();
 }
 
 console.log('Socket.io server started.');
