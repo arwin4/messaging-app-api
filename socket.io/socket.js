@@ -125,12 +125,14 @@ function startSocket(httpServer) {
     io.to(roomId).emit('room-deleted');
   }
 
+  // Watch the rooms in the database and act accordingly to changes
   function watchRooms() {
-    // Watch the rooms in the database and act accordingly to changes
-    Room.watch([], {
+    const changeStream = Room.watch([], {
       fullDocumentBeforeChange: 'whenAvailable',
       fullDocument: 'updateLookup',
-    }).on('change', async (data) => {
+    });
+
+    changeStream.on('change', async (data) => {
       const roomId = data.documentKey._id.toString();
       // Detect type of change to room document
       console.log('Detecting type of room change...');
@@ -151,11 +153,9 @@ function startSocket(httpServer) {
       }
     });
 
-    Room.watch([], {
-      fullDocumentBeforeChange: 'whenAvailable',
-      fullDocument: 'updateLookup',
-    }).on('close', async (data) => {
+    changeStream.on('close', async () => {
       console.log('[DEBUG] close event');
+      changeStream.close();
       watchRooms();
     });
 
