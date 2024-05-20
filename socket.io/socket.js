@@ -153,8 +153,10 @@ function startSocket(httpServer) {
       }
     });
 
-    changeStream.on('close', async () => {
-      console.log('[DEBUG] close event');
+    changeStream.once('close', async () => {
+      console.log(
+        'Close event detected in change stream. Closing current stream.',
+      );
       changeStream.close();
       watchRooms();
     });

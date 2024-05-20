@@ -15,10 +15,10 @@ You might like to check out [the frontend](https://github.com/arwin4/messaging-a
 - A bot user that counts messages
 - Validation using express-validator
 
-## Known issues
+## ~~Known issues~~
 
-- mongo.watch() in socket.js detaches automatically after a period of time,
+- ~~mongo.watch() in socket.js detaches automatically after a period of time,
   causing all socket event emissions to fail. The suspicion is that a 'close'
   event occurs mongo.watch(), after which the connection is not reestablished.
   It is unknown what causes this. This issue has occurred within hours of
-  deployment but it may also take several days for it to happen.
+  deployment but it may also take several days for it to happen.~~
